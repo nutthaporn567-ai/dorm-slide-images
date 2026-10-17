@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Staff Dormitory 1 · 4D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Cormorant+Garamond:wght@500;600&display=swap">
+<style>
+/* Layout: full-height viewer — 3D stage fills the left, a narrow control rail on the right (stacks under the stage on phones) */
+:root{
+  --bg:#211a16; --panel:#2c231e; --line:#43372f; --fg:#f3ece3; --muted:#b8a998; --accent:#d58a2b; --sand:#c9b8a3;
+  --done:#9d9c96; --wip:#f28c28; --todo:#7fb2e5; --ok:#8fb072;
+  --f-display:"Cormorant Garamond", Georgia, serif; --f-body:"Prompt", "Noto Sans Thai", system-ui, sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;margin:0;overflow:hidden}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:border-box}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px}
+.brand{display:flex;flex-direction:column;min-width:0}
+.brand b{font-family:var(--f-display);font-size:26px;font-weight:600;letter-spacing:.06em;line-height:1}
+.brand span{color:var(--muted);font-size:12px}
+.tabs{margin-left:auto;display:flex;gap:4px;background:var(--panel);padding:4px;border-radius:10px;border:1px solid var(--line)}
+.tabs button{background:transparent;color:var(--muted);border:0;padding:7px 14px;border-radius:7px;font:500 13px var(--f-body);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+main{display:grid;grid-template-columns:1fr 340px;gap:12px;min-height:0;padding-bottom:12px}
+.stage{position:relative;border-radius:12px;overflow:hidden;background:#cfdbe6;min-height:0}
+.stage canvas{display:block;width:100%!important;height:100%!important;touch-action:none}
+.badge{position:absolute;left:14px;top:14px;background:rgba(33,26,22,.82);padding:10px 14px;border-radius:10px;pointer-events:none;max-width:calc(100% - 28px)}
+.badge .d{font-size:22px;font-weight:600;line-height:1.2}
+.badge .m{color:var(--sand);font-size:12px}
+.hint{position:absolute;right:14px;bottom:12px;font-size:11px;color:#3b2f2a;background:rgba(255,255,255,.7);padding:4px 8px;border-radius:6px;pointer-events:none}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto;display:flex;flex-direction:column;gap:14px;min-height:0}
+.group{display:flex;flex-direction:column;gap:8px}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.seg{display:flex;gap:4px;flex-wrap:wrap}
+.seg button{flex:1;min-width:0;background:transparent;border:1px solid var(--line);color:var(--fg);padding:7px 8px;border-radius:8px;font:400 13px var(--f-body);cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--accent);background:rgba(213,138,43,.16)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;align-items:center;gap:8px}
+.play{background:var(--accent);color:#1d140e;border:0;border-radius:8px;padding:7px 12px;font:600 13px var(--f-body);cursor:pointer}
+.marks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+select{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:400 13px var(--f-body)}
+.list{display:flex;flex-direction:column;gap:6px}
+.task{display:grid;grid-template-columns:1fr 64px 36px;align-items:center;gap:8px;font-size:12.5px}
+.task .bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+.task .bar i{display:block;height:100%;border-radius:4px}
+.task em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi div{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.kpi b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11px;color:var(--muted)}
+.note{font-size:11.5px;color:var(--muted);line-height:1.5}
+@media (max-width:820px){ body{overflow:auto} .app{height:auto} main{grid-template-columns:1fr} .stage{height:58vh} aside{overflow:visible} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+<div class="app">
+  <header>
+    <div class="brand"><b>STAFF DORMITORY 1</b><span>อาคารหอพักพนักงาน 6 ชั้น · สถานีนครราชสีมา (DK251+400) · แบบจำลอง 4 มิติ</span></div>
+    <div class="tabs" role="tablist">
+      <button id="tab4d" role="tab" aria-selected="true">ก่อสร้าง 4D</button>
+      <button id="tabLux" role="tab" aria-selected="false">อาคารแล้วเสร็จ</button>
+    </div>
+  </header>
+  <main>
+    <div class="stage" id="stage">
+      <div class="badge"><div class="d" id="bDate">–</div><div class="m" id="bMode">–</div></div>
+      <div class="hint">ลากเพื่อหมุน · สกรอลล์/บีบเพื่อซูม · คลิกขวาเพื่อเลื่อน</div>
+    </div>
+    <aside id="rail4d">
+      <div class="group">
+        <div class="lbl">วันที่</div>
+        <input type="range" id="date" min="0" max="354" value="263" aria-label="เลือกวันที่">
+        <div class="row"><button class="play" id="play">▶ เล่นลำดับก่อสร้าง</button><button class="seg-btn play" id="toStatus" style="background:transparent;color:var(--fg);border:1px solid var(--line)">ไปวันที่รายงาน</button></div>
+        <div class="marks"><span>ก.ย. 69</span><span>ม.ค. 70</span><span>พ.ค. 70</span><span>ส.ค. 70</span></div>
+      </div>
+      <div class="group">
+        <div class="lbl">ข้อมูล</div>
+        <div class="seg" id="modeSeg"><button data-v="plan" aria-pressed="false">ตามแผน</button><button data-v="actual" aria-pressed="true">ตามจริง</button></div>
+        <div class="seg" id="viewSeg"><button data-v="real" aria-pressed="true">สภาพจริง</button><button data-v="status" aria-pressed="false">สีตามสถานะ</button></div>
+        <div class="legend" id="legend" hidden><span><i style="background:var(--done)"></i>เสร็จ</span><span><i style="background:var(--wip)"></i>กำลังทำ</span><span><i style="background:var(--todo)"></i>ยังไม่เริ่ม</span></div>
+      </div>
+      <div class="group">
+        <div class="lbl">ตัดชั้นดูภายใน</div>
+        <select id="cut"><option value="99">แสดงทั้งอาคาร</option><option value="1">ถึงชั้น 1</option><option value="2">ถึงชั้น 2</option><option value="3">ถึงชั้น 3</option><option value="4">ถึงชั้น 4</option><option value="5">ถึงชั้น 5</option></select>
+      </div>
+      <div class="group">
+        <div class="lbl" id="listTitle">งานที่กำลังดำเนินการ</div>
+        <div class="list" id="list"></div>
+      </div>
+      <div class="group">
+        <div class="lbl">ณ วันที่รายงาน 22 พ.ค. 2570</div>
+        <div class="kpi">
+          <div><b>55%</b><span>% Complete (MS Project)</span></div>
+          <div><b>70.3%</b><span>BCWP ผลงานสะสม</span></div>
+          <div><b>0.81</b><span>SPI (สิ้น พ.ค. 70)</span></div>
+          <div><b>0.86</b><span>CPI (สิ้น พ.ค. 70)</span></div>
+        </div>
+        <div class="note">ข้อมูลจาก Earn_Value.mpp (Baseline เทียบ Actual) และ S-CURVE_EARNED_VALUE_1.xlsx · โหมด "ตามจริง" แสดงผลถึงวันที่รายงาน หลังจากนั้นค้างสถานะไว้</div>
+      </div>
+    </aside>
+    <aside id="railLux" hidden>
+      <div class="group">
+        <div class="lbl">บรรยากาศ</div>
+        <div class="seg" id="luxSeg"><button data-v="golden" aria-pressed="true">แดดเย็น</button><button data-v="night" aria-pressed="false">ยามค่ำ</button></div>
+      </div>
+      <div class="group">
+        <div class="lbl">มุมกล้อง</div>
+        <div class="seg" id="luxCam"><button data-v="golden">ริมสระ</button><button data-v="aerial">มุมสูง</button><button data-v="west">ทางเข้า</button></div>
+      </div>
+      <div class="note">แบบจำลองยึดขนาดจากแบบสถาปัตย์ C3-5A-SPTK-AR-08-06: อาคาร 16.5 × 32.0 ม. สูง 6 ชั้น ชั้นละ 2.80 ม. หลังคา +17.45 ม. ตำแหน่งระเบียง บันได และลิฟต์ตามแปลน วัสดุ ภูมิทัศน์ และสระน้ำเป็นแนวคิดการตกแต่ง</div>
+    </aside>
+  </main>
+</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+// 4D construction model for Staff Dormitory 1 — driven by MS Project schedule
+// buildConstruction(THREE, mergeGeometries, sched, dateStr, opts) -> {group, info}
+const FL = [0.65, 3.45, 6.25, 9.05, 11.85, 14.65]; const ROOF = 17.45;
+const XW = 2.0, XE = 14.3, XW0 = 0.0, XE0 = 16.3, Z0 = 0, Z1 = 32;
+const GX = [2, 7, 9.3, 14.3], GZ = [0, 4, 8, 16, 24, 32];
+const PODS = { W: [[18.9, 29.1], [8.3, 14.9]], E: [[18.9, 29.1], [0.3, 14.9]] };
+const DAY = 86400000;
+const D = s => s ? Date.parse(s + 'T00:00:00Z') : null;
+
+function progressFn(sched, dateStr, mode) {
+  const t = D(dateStr), st = D(sched.status);
+  const cache = new Map();
+  const prog = task => {
+    if (mode === 'plan' || task.g === 'P') {
+      const a = D(task.bs), b = D(task.bf) + DAY; return Math.max(0, Math.min(1, (t - a) / (b - a)));
+    }
+    if (!task.as_) return 0;
+    if (t >= st) return task.af ? 1 : (task.pct || 0) / 100;
+    const tt = t;
+    const a = D(task.as_), full = task.af ? 1 : (task.pct || 0) / 100;
+    const b = task.af ? D(task.af) + DAY : st + DAY;
+    return full * Math.max(0, Math.min(1, (tt - a) / Math.max(b - a, DAY)));
+  };
+  // p(g, fl, elPrefix, actPrefix) -> average progress (cost-weighted where possible)
+  return (g, fl, el, act) => {
+    const key = g + '|' + fl + '|' + el + '|' + (act || '');
+    if (cache.has(key)) return cache.get(key);
+    const ts = sched.tasks.filter(x => x.g === g && String(x.fl) === String(fl) && (!el || x.el.startsWith(el)) && (!act || x.act.startsWith(act)));
+    let v = 0; if (ts.length) v = ts.reduce((s, x) => s + prog(x), 0) / ts.length;
+    cache.set(key, v); return v;
+  };
+}
+
+function buildConstruction(THREE, merge, sched, dateStr, opts = {}) {
+  const mode = opts.mode || 'plan';
+  const p = progressFn(sched, dateStr, mode);
+  const STATUS = !!opts.status;               // colour by status
+  const CUT = opts.cut ?? 99;                 // hide floors above this floor index (1..6)
+  const group = new THREE.Group();
+  const buckets = {};
+  const mats = opts.mats;
+  const add = (mat, x0, y0, z0, x1, y1, z1) => {
+    if (Math.abs(x1 - x0) < 1e-4 || Math.abs(y1 - y0) < 1e-4 || Math.abs(z1 - z0) < 1e-4) return;
+    const g = new THREE.BoxGeometry(Math.abs(x1 - x0), Math.abs(y1 - y0), Math.abs(z1 - z0));
+    g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); (buckets[mat] ||= []).push(g);
+  };
+  const addGeo = (mat, g) => (buckets[mat] ||= []).push(g);
+  // status-aware add: state 0 = not started, 1 = in progress, 2 = done
+  const sadd = (state, mat, ...b) => {
+    if (STATUS) { if (state === 0) add('ghost', ...b); else if (state === 1) add('wip', ...b); else add(mat, ...b); }
+    else if (state > 0) add(mat, ...b);
+  };
+  const stOf = (v) => v >= 0.999 ? 2 : v > 0.001 ? 1 : 0;
+  // split items along an ordering by fraction v
+  const itemState = (i, n, v) => { const u0 = i / n, u1 = (i + 1) / n; return v >= u1 - 1e-6 ? 2 : v > u0 + 1e-6 ? 1 : 0; };
+  const info = { date: dateStr, mode, active: [] };
+  const note = (label, v) => { if (v > 0.001 && v < 0.999) info.active.push([label, v]); };
+
+  // ---------------- PREPARATION / SITE ----------------
+  const fence = p('P', 'Site Preparation', '', 'Temporary Fencing');
+  if (fence > 0) {
+    const pts = [[-22, -30], [40, -30], [40, 52], [-22, 52]]; let perim = 0; const segs = [];
+    for (let i = 0; i < 4; i++) { const a = pts[i], b = pts[(i + 1) % 4]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); segs.push([a, b, L]); perim += L; }
+    let left = perim * fence;
+    for (const [a, b, L] of segs) { if (left <= 0) break; const f = Math.min(1, left / L); left -= L;
+      const x1 = a[0] + (b[0] - a[0]) * f, z1 = a[1] + (b[1] - a[1]) * f;
+      add('fence', Math.min(a[0], x1) - 0.03, 0, Math.min(a[1], z1) - 0.03, Math.max(a[0], x1) + 0.03, 2.0, Math.max(a[1], z1) + 0.03); }
+  }
+  const container = (mat, x, z, len = 6, w = 2.4, h = 2.6, rotX = true) => rotX ? add(mat, x, 0, z, x + len, h, z + w) : add(mat, x, 0, z, x + w, h, z + len);
+  if (p('P', 'Temporary Site Office & Facilities', '', 'Site Office') > 0.5) { container('office', -18, -24); container('office', -18, -21.2); add('roofsheet', -18.3, 2.6, -24.3, -11.7, 2.75, -18.5); }
+  if (p('P', 'Temporary Site Office & Facilities', '', 'Labor Camp') > 0.5) for (let i = 0; i < 4; i++) container('camp', -18, 30 + i * 3.0, 6.0);
+  if (p('P', 'Temporary Site Office & Facilities', '', 'Material Storage') > 0.5) { add('shed', 26, 0, 36, 36, 0.15, 46); for (let i = 0; i < 4; i++) add('steelpost', 26 + i * 3.3, 0, 36, 26.15 + i * 3.3, 3.2, 36.15); add('roofsheet', 25.8, 3.2, 35.8, 36.2, 3.3, 46.2); add('rebarstack', 27, 0.15, 38, 33, 0.6, 40); add('blocks', 27, 0.15, 42, 30, 1.2, 44); }
+  if (p('P', 'Temporary Site Office & Facilities', '', 'Guard House') > 0.5) add('office', 14, 0, -29.5, 16.4, 2.6, -27.5);
+
+  // ---------------- FOUNDATION ----------------
+  const pile = p('S', 'FD', 'Piling system', 'Pile Driving'), cut = p('S', 'FD', 'Piling system', 'Pile Cut');
+  const exc = p('S', 'FD', 'Excavation work', 'Soil Excavation'), backfill = p('S', 'FD', 'Excavation work', 'Back Fill');
+  const ftR = p('S', 'FD', 'Footing work', 'Reinforcement'), ftF = p('S', 'FD', 'Footing work', 'Formwork'), ftC = p('S', 'FD', 'Footing work', 'Concrete');
+  note('งานตอกเสาเข็ม', pile); note('งานขุดดิน', exc); note('งานฐานราก', (ftR + ftF + ftC) / 3);
+  const caps = []; for (const z of GZ) for (const x of GX) caps.push([x, z]);
+  caps.push([5.8, 0.75]); // lift core cap
+  caps.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+  const pitOpen = exc > 0 && backfill < 1;
+  info.pit = pitOpen ? Math.min(1, exc) : 0;
+  caps.forEach(([x, z], i) => {
+    const s = itemState(i, caps.length, pile);
+    if (s > 0 || STATUS) for (const [dx, dz] of [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]]) {
+      const top = cut > (i + 1) / caps.length ? -1.2 : (pitOpen ? -0.4 : 0.6);
+      const g = new THREE.CylinderGeometry(0.15, 0.15, top + 8, 8); g.translate(x + dx, (top - 8) / 2, z + dz);
+      if (STATUS && s === 0) addGeo('ghost', g); else if (s > 0) addGeo(STATUS && s === 1 ? 'wip' : 'pile', g);
+    }
+    const sc = itemState(i, caps.length, ftC), sr = itemState(i, caps.length, ftR), sf = itemState(i, caps.length, ftF);
+    if (sc === 2) add('concrete', x - 0.9, -1.6, z - 0.9, x + 0.9, -0.8, z + 0.9);
+    else if (sf > 0) add('formwork', x - 0.95, -1.6, z - 0.95, x + 0.95, -0.8, z + 0.95);
+    else if (sr > 0) add('rebar', x - 0.85, -1.55, z - 0.85, x + 0.85, -0.85, z + 0.85);
+    else if (STATUS) add('ghost', x - 0.9, -1.6, z - 0.9, x + 0.9, -0.8, z + 0.9);
+  });
+  // stub columns + grade beams (FD column)
+  const fdCol = p('S', 'FD', 'Column', 'Concrete');
+  caps.slice(0, -1).forEach(([x, z], i) => sadd(itemState(i, caps.length - 1, fdCol), 'concrete', x - 0.2, -0.8, z - 0.3, x + 0.2, FL[0] - 0.4, z + 0.3));
+  const fdLift = p('S', 'FD', 'Lift core', 'Concrete');
+  liftCore(-1.6, FL[0], stOf(fdLift));
+  // excavated pit / backfill surface
+  if (pitOpen) { add('soil', XW - 1.5, -1.7, Z0 - 1.5, XE + 1.5, -1.6, Z1 + 1.5);
+    for (let i = 0; i < 6; i++) { const g = new THREE.ConeGeometry(2.2, 1.6, 10); g.translate(22 + (i % 3) * 3.5, 0.8, 6 + Math.floor(i / 3) * 10); addGeo('soil', g); } }
+  else if (backfill >= 1 && p('S', 1, 'RC Slab', 'Concrete') < 1) add('sand', XW - 0.6, -0.05, Z0 - 0.6, XE + 0.6, 0.02, Z1 + 0.6);
+
+  function liftCore(y0, y1, state) {
+    if (state === 0 && !STATUS) return;
+    const m = 'concrete'; const x0 = 4.6, x1 = 7.0, z0 = -0.35, z1 = 1.85, t = 0.2;
+    sadd(state, m, x0, y0, z0, x1, y1, z0 + t); sadd(state, m, x0, y0, z1 - t, x1, y1, z1);
+    sadd(state, m, x0, y0, z0, x0 + t, y1, z1); sadd(state, m, x1 - t, y0, z0, x1, y1, z1);
+  }
+
+  // ---------------- STRUCTURE PER FLOOR ----------------
+  const slabZones = (k) => { const z = [[XW, Z0, XE, Z1]]; if (k >= 1) { for (const [a, b] of PODS.W) z.push([XW0, a, XW, b]); for (const [a, b] of PODS.E) z.push([XE, a, XE0, b]); } return z; };
+  const nBays = 8; // slab broken into 8 bays along z for progress
+  let topConcrete = FL[0];
+  for (let k = 1; k <= 6; k++) {
+    if (k > CUT) break;
+    const y0 = FL[k - 1], yTop = k < 6 ? FL[k] : ROOF;
+    const fw = Math.max(p('S', k, 'RC Slab', 'Formwork'), p('S', k, 'Post tension', 'Formwork'));
+    const rb = Math.max(p('S', k, 'RC Slab', 'Reinforcement'), p('S', k, 'Post tension', 'Reinforcement'));
+    const duct = p('S', k, 'Post tension', 'Tendon');
+    const conc = Math.min(p('S', k, 'RC Slab', 'Concrete'), p('S', k, 'Post tension', 'Concrete'));
+    const strip = p('S', k, 'RC Slab', 'Curing');
+    const colC = p('S', k, 'Column', 'Concrete'), colR = p('S', k, 'Column', 'Reinforcement'), colF = p('S', k, 'Column', 'Formwork');
+    const lift = p('S', k, 'Lift core', 'Concrete'), liftF = p('S', k, 'Lift core', 'Formwork');
+    const stair = p('S', k, 'Stair', 'Concrete');
+    const slabAll = p('S', k, 'RC Slab') * 0.3 + p('S', k, 'Post tension') * 0.5 + p('S', k, 'RC Beam') * 0.2;
+    note(`โครงสร้างชั้น ${k} (พื้น PT/คาน)`, slabAll); note(`เสาชั้น ${k}`, (colC + colR + colF) / 3); note(`ผนังลิฟต์ชั้น ${k}`, lift);
+    if (k === 1) { // ground slab on grade
+      for (const [x0, z0, x1, z1] of slabZones(1)) for (let b = 0; b < nBays; b++) {
+        const za = z0 + (z1 - z0) * b / nBays, zb = z0 + (z1 - z0) * (b + 1) / nBays;
+        const s = itemState(b, nBays, conc);
+        if (s === 2 || (s === 1 && !STATUS)) add('concrete', x0, y0 - 0.25, za, x1, y0, zb);
+        else if (rb > b / nBays) add(STATUS ? 'wip' : 'rebarmesh', x0, y0 - 0.12, za, x1, y0 - 0.08, zb);
+        else if (fw > b / nBays) add(STATUS ? 'wip' : 'formwork', x0, y0 - 0.26, za, x1, y0 - 0.2, zb);
+        else if (STATUS) add('ghost', x0, y0 - 0.25, za, x1, y0, zb);
+      }
+    } else {
+      for (const [x0, z0, x1, z1] of slabZones(k)) for (let b = 0; b < nBays; b++) {
+        const za = z0 + (z1 - z0) * b / nBays, zb = z0 + (z1 - z0) * (b + 1) / nBays;
+        const u = (b + 1) / nBays;
+        const cDone = conc >= u - 1e-6, fDone = fw >= u - 1e-6 || fw > b / nBays, rDone = rb > b / nBays;
+        if (cDone) {
+          add('concrete', x0, y0 - 0.25, za, x1, y0, zb);
+          if (strip < 1) { add('formwork', x0, y0 - 0.3, za, x1, y0 - 0.25, zb); props(x0, x1, za, zb, FL[k - 2] , y0 - 0.3); }
+        } else if (fDone) {
+          add(STATUS ? 'wip' : 'formwork', x0, y0 - 0.3, za, x1, y0 - 0.25, zb); props(x0, x1, za, zb, FL[k - 2], y0 - 0.3);
+          if (rDone) add('rebarmesh', x0, y0 - 0.12, za, x1, y0 - 0.08, zb);
+          if (duct > b / nBays) add('tendon', x0, y0 - 0.15, za, x1, y0 - 0.13, zb);
+        } else if (STATUS) add('ghost', x0, y0 - 0.25, za, x1, y0, zb);
+      }
+      // perimeter beams
+      if (conc >= 1) { add('concrete', XW - 0.05, y0 - 0.65, Z0, XW + 0.3, y0 - 0.25, Z1); add('concrete', XE - 0.3, y0 - 0.65, Z0, XE + 0.05, y0 - 0.25, Z1); }
+      if (conc > 0.001) topConcrete = Math.max(topConcrete, y0);
+    }
+    // columns rising from this slab
+    const cols = []; for (const z of GZ) for (const x of GX) cols.push([x, z]);
+    cols.forEach(([x, z], i) => {
+      const sc = itemState(i, cols.length, colC), sf = itemState(i, cols.length, colF), sr = itemState(i, cols.length, colR);
+      const cx0 = x - 0.2, cx1 = x + 0.2, cz0 = z - 0.3, cz1 = z + 0.3;
+      if (sc === 2) add('concrete', cx0, y0, cz0, cx1, yTop - 0.25, cz1);
+      else if (sf > 0) add(STATUS ? 'wip' : 'formwork', cx0 - 0.04, y0, cz0 - 0.04, cx1 + 0.04, yTop - 0.25, cz1 + 0.04);
+      else if (sr > 0) { for (const [dx, dz] of [[-0.15, -0.25], [0.15, -0.25], [-0.15, 0.25], [0.15, 0.25]]) add(STATUS ? 'wip' : 'rebar', x + dx - 0.015, y0, z + dz - 0.015, x + dx + 0.015, yTop + 0.6, z + dz + 0.015); }
+      else if (STATUS) add('ghost', cx0, y0, cz0, cx1, yTop - 0.25, cz1);
+    });
+    const ls = stOf(lift); if (ls > 0 || STATUS) liftCore(y0, yTop + (k === 6 ? 1.3 : 0), ls === 0 && liftF > 0 ? 1 : ls);
+    // stair flights (ST1 west & ST2 north) from previous level to this level
+    if (k >= 2) { const ss = stOf(stair); const yA = FL[k - 2], yB = y0;
+      for (const [xa, xb, za, zb] of [[2.3, 4.4, 4.2, 7.8], [7.3, 9.0, 29.4, 31.8]]) {
+        const L = Math.hypot(zb - za, yB - yA); const g = new THREE.BoxGeometry(xb - xa, 0.18, L); g.rotateX(-Math.atan2(yB - yA, zb - za)); g.translate((xa + xb) / 2, (yA + yB) / 2, (za + zb) / 2);
+        if (ss === 2) addGeo('concrete', g); else if (ss === 1) addGeo(STATUS ? 'wip' : 'formwork', g); else if (STATUS) addGeo('ghost', g); } }
+  }
+  function props(x0, x1, za, zb, yb, yt) { for (let x = x0 + 0.6; x < x1; x += 1.8) for (let z = za + 0.6; z < zb; z += 1.8) add('steelpost', x - 0.03, yb, z - 0.03, x + 0.03, yt, z + 0.03); }
+
+  // ---------------- ROOF DECK + ROOF ----------------
+  if (CUT >= 6) {
+    const rdB = p('S', 'RD', 'RC Roof Beam', 'Concrete'), rdS = p('S', 'RD', 'RC Slab', 'Concrete'), rdG = p('S', 'RD', 'RC Gutter', 'Concrete'), rdL = p('S', 'RD', 'Lift Slab', 'Concrete');
+    const rdF = p('S', 'RD', 'RC Roof Beam', 'Formwork');
+    note('พื้นดาดฟ้า (Roof Deck)', p('S', 'RD')); note('โครงหลังคาเหล็ก', p('S', 'RW', 'Steel')); note('มุงหลังคาเมทัลชีท', p('S', 'RW', 'Roof Covering'));
+    const sB = stOf(rdB), sS = stOf(rdS);
+    for (const z of GZ) sadd(sB === 0 && rdF > 0 ? 1 : sB, 'concrete', XW, ROOF - 0.6, z - 0.15, XE, ROOF, z + 0.15);
+    sadd(sB, 'concrete', XW, ROOF - 0.6, Z0, XW + 0.3, ROOF, Z1); sadd(sB, 'concrete', XE - 0.3, ROOF - 0.6, Z0, XE, ROOF, Z1);
+    sadd(sS, 'concrete', XW, ROOF - 0.15, Z0, 7.95, ROOF, Z1); sadd(sS, 'concrete', 8.55, ROOF - 0.15, Z0, XE, ROOF, Z1);
+    sadd(stOf(rdG), 'concrete', 7.95, ROOF - 0.4, Z0, 8.55, ROOF, Z1);
+    sadd(stOf(rdL), 'concrete', 4.4, 18.6, -0.5, 7.2, 18.8, 2.05);
+    const er = p('S', 'RW', 'Steel', 'Erection'), cov = p('S', 'RW', 'Roof Covering', 'Roof Erection');
+    const tilt = Math.tan(5 * Math.PI / 180);
+    // steel rafters every 2 m (butterfly towards central gutter)
+    const nR = 17; for (let i = 0; i < nR; i++) { const z = -1 + i * 2.125; const s = itemState(i, nR, er);
+      if (s === 0 && !STATUS) continue; const mat = s === 2 ? 'steel' : (STATUS ? (s === 1 ? 'wip' : 'ghost') : 'steel');
+      for (const [xa, xb] of [[XW0 - 1, 8.0], [8.5, XE0 + 1]]) { const L = xb - xa; const g = new THREE.BoxGeometry(L, 0.25, 0.12);
+        const yc = ROOF + 0.55 + (xa < 8 ? 1 : 1) * tilt * L / 2; g.rotateZ(xa < 8 ? -Math.atan(tilt) : Math.atan(tilt)); g.translate((xa + xb) / 2, yc, z); addGeo(mat, g); } }
+    for (const [xa, xb, sgn] of [[XW0 - 1, 8.0, -1], [8.5, XE0 + 1, 1]]) {
+      const L = xb - xa; const n = 8;
+      for (let b = 0; b < n; b++) { const s = itemState(b, n, cov); if (s === 0 && !STATUS) continue;
+        const za = -1 + 34 * b / n, zb = -1 + 34 * (b + 1) / n; const g = new THREE.BoxGeometry(L, 0.06, zb - za);
+        g.rotateZ(sgn * Math.atan(tilt)); g.translate((xa + xb) / 2, ROOF + 0.72 + tilt * L / 2, (za + zb) / 2);
+        addGeo(s === 2 ? 'metalroof' : (STATUS ? (s === 1 ? 'wip' : 'ghost') : 'metalroof'), g); } }
+    info.roofDone = cov;
+  }
+
+  // ---------------- ARCHITECTURE PER FLOOR ----------------
+  const finishedAll = [];
+  for (let k = 1; k <= Math.min(6, CUT); k++) {
+    const y0 = FL[k - 1], y1 = (k < 6 ? FL[k] : ROOF) - 0.25;
+    const aac = p('A', k, 'Wall', 'Autoclaved'), pl = p('A', k, 'Wall', 'Plaster'), tile = p('A', k, 'Wall', 'Ceramic');
+    const ft = p('A', k, 'Floor', 'Ceramic'), cf = p('A', k, 'Ceiling', 'Ceiling Frame'), gb = p('A', k, 'Ceiling', 'Gypsum');
+    const wf = p('A', k, 'Door', 'Door / Window Frame'), wl = p('A', k, 'Door', 'Door / Window Leaf');
+    const pr = p('A', k, 'Painting', 'Primer'), fc = p('A', k, 'Painting', 'Finish');
+    const wp = p('A', k, 'Waterproofing');
+    const lbl = `ชั้น ${k}`;
+    note(`${lbl} ก่อผนังมวลเบา AAC`, aac); note(`${lbl} ฉาบปูน`, pl); note(`${lbl} บุกระเบื้องผนัง`, tile); note(`${lbl} ปูกระเบื้องพื้น`, ft);
+    note(`${lbl} โครงฝ้า/ยิปซัม`, (cf + gb) / 2); note(`${lbl} วงกบ/บานประตูหน้าต่าง`, (wf + wl) / 2); note(`${lbl} ทาสี`, (pr + fc) / 2); note(`${lbl} กันซึม`, wp);
+    finishedAll.push(fc);
+    // wall items: exterior long faces per 2 m bay (with window opening), corridor walls, partitions
+    const items = [];
+    for (let z = 0; z < 32; z += 2) {
+      for (const side of ['W', 'E']) {
+        const sx = side === 'W' ? XW : XE;
+        if (side === 'W' && z + 1 > 3.8 && z + 1 < 8.3) continue; // stair curtain wall
+        items.push({ z: z + 1, kind: 'ext', side, build: (mat, frac = 1) => {
+          const x0 = sx - 0.1, x1 = sx + 0.1;
+          add(mat, x0, y0, z, x1, y0 + 0.9, z + 2);           // sill
+          add(mat, x0, y1 - 0.45, z, x1, y1, z + 2);         // lintel
+          add(mat, x0, y0 + 0.9, z, x1, y1 - 0.45, z + 0.4);  // jambs
+          add(mat, x0, y0 + 0.9, z + 1.6, x1, y1 - 0.45, z + 2);
+        }, open: [sx, z + 0.4, z + 1.6] });
+      }
+    }
+    for (let z = 0; z < 32; z += 4) { // corridor walls + partitions
+      items.push({ z: z + 2, kind: 'int', build: (mat) => { add(mat, 6.95, y0, z, 7.15, y1, z + 3.0); add(mat, 9.15, y0, z + 1.0, 9.35, y1, z + 4); } });
+      if (z > 0) items.push({ z, kind: 'int', build: (mat) => { add(mat, XW, y0, z - 0.08, 7, y1, z + 0.08); add(mat, 9.3, y0, z - 0.08, XE, y1, z + 0.08); } });
+    }
+    // end walls
+    items.push({ z: 0, kind: 'ext', build: (mat) => { add(mat, 9.3, y0, -0.1, XE, y0 + 0.9, 0.1); add(mat, 9.3, y1 - 0.45, -0.1, XE, y1, 0.1); add(mat, 9.3, y0 + 0.9, -0.1, 10.4, y1 - 0.45, 0.1); add(mat, 13.3, y0 + 0.9, -0.1, XE, y1 - 0.45, 0.1); }, open: null });
+    items.push({ z: 32, kind: 'ext', build: (mat) => { add(mat, XW, y0, 31.9, 7.0, y1, 32.1); add(mat, 9.3, y0, 31.9, XE, y1, 32.1); } });
+    // toilet pods (balcony side) walls
+    for (const side of ['W', 'E']) { const toilets = side === 'W' ? [[22.85, 25.15], [8.3, 10.2]] : [[22.85, 25.15], [6.85, 9.15]];
+      const xo = side === 'W' ? XW0 + 0.25 : XE0 - 0.25, xi = side === 'W' ? XW : XE;
+      for (const [a, b] of toilets) items.push({ z: (a + b) / 2, kind: 'pod', side, build: (mat) => { add(mat, Math.min(xo, xi), y0, a, Math.max(xo, xi), y1, a + 0.1); add(mat, Math.min(xo, xi), y0, b - 0.1, Math.max(xo, xi), y1, b); add(mat, xo - 0.05, y0, a, xo + 0.05, y1, b); } }); }
+    items.sort((a, b) => a.z - b.z);
+    const n = items.length;
+    items.forEach((it, i) => {
+      const u1 = (i + 1) / n, u0 = i / n;
+      const has = v => v >= u1 - 1e-6;
+      const started = v => v > u0 + 1e-6;
+      let mat = null, state = 0;
+      if (has(fc)) { mat = it.kind === 'int' ? 'plaster' : (it.kind === 'pod' ? 'paintPod' : 'paint'); state = 2; }
+      else if (has(pr)) { mat = 'primer'; state = 2; }
+      else if (has(pl)) { mat = 'plaster'; state = 2; }
+      else if (has(aac)) { mat = 'aac'; state = 2; }
+      else if (started(aac)) { mat = 'aac'; state = 1; }
+      if (STATUS) {
+        if (state === 0) mat = 'ghost';
+        else if (!has(fc) && (started(aac) || started(pl) || started(pr) || started(fc)) && !(has(aac) && !started(pl))) {
+          // something in progress on this item
+          if (started(aac) && !has(aac)) mat = 'wip';
+          else if (started(pl) && !has(pl)) mat = 'wip';
+          else if (started(pr) && !has(pr)) mat = 'wip';
+          else if (started(fc) && !has(fc)) mat = 'wip';
+        }
+      }
+      if (mat) it.build(mat);
+      // windows / doors in exterior openings
+      if (it.open) { const [sx, za, zb] = it.open;
+        if (has(wf)) { add('bronze', sx - 0.06, y0 + 0.9, za, sx + 0.06, y1 - 0.45, za + 0.05); add('bronze', sx - 0.06, y0 + 0.9, zb - 0.05, sx + 0.06, y1 - 0.45, zb); add('bronze', sx - 0.06, y0 + 0.9, za, sx + 0.06, y0 + 0.95, zb); add('bronze', sx - 0.06, y1 - 0.5, za, sx + 0.06, y1 - 0.45, zb);
+          if (has(wl)) add('glass', sx - 0.01, y0 + 0.95, za + 0.05, sx + 0.01, y1 - 0.5, zb - 0.05); }
+        else if (STATUS && it.kind === 'ext') add(started(wf) ? 'wip' : 'ghost', sx - 0.01, y0 + 0.95, za + 0.05, sx + 0.01, y1 - 0.5, zb - 0.05);
+      }
+    });
+    // floor tile & ceiling (fraction along z)
+    const nb = 8;
+    for (let b = 0; b < nb; b++) { const za = 32 * b / nb, zb = 32 * (b + 1) / nb;
+      const s = itemState(b, nb, ft); if (s > 0 || STATUS) { const m = s === 2 ? 'tile' : (STATUS ? (s === 1 ? 'wip' : 'ghostfloor') : 'tile'); add(m, XW + 0.12, y0, za, XE - 0.12, y0 + 0.03, zb); }
+      const sf = itemState(b, nb, cf), sg = itemState(b, nb, gb);
+      if (sg === 2 || (sg === 1 && !STATUS)) add('gypsum', XW + 0.12, y1 - 0.35, za, XE - 0.12, y1 - 0.33, zb);
+      else if (sf > 0 || sg > 0) { for (let x = XW + 0.6; x < XE; x += 1.2) add(STATUS ? 'wip' : 'steel', x - 0.02, y1 - 0.33, za, x + 0.02, y1 - 0.30, zb); }
+    }
+    // balcony waterproofing / finishes
+    if (k >= 1) for (const side of ['W', 'E']) for (const [a, b] of PODS[side]) {
+      const x0 = side === 'W' ? XW0 : XE, x1 = side === 'W' ? XW : XE0;
+      const s = stOf(wp); if (s > 0 || STATUS) add(s === 2 ? 'waterproof' : (STATUS ? (s === 1 ? 'wip' : 'ghostfloor') : 'waterproof'), x0 + 0.05, y0, a + 0.05, x1 - 0.05, y0 + 0.03, b - 0.05);
+      if (fc >= 0.999) { const xr = side === 'W' ? XW0 + 0.05 : XE0 - 0.05; add('rail', xr - 0.01, y0, a + 0.05, xr + 0.01, y0 + 1.1, b - 0.05); add('bronze', xr - 0.03, y0 + 1.08, a + 0.05, xr + 0.03, y0 + 1.13, b - 0.05); }
+    }
+    // scaffold on exterior faces while wall/paint work in progress
+    if (aac > 0 && fc < 1 && !STATUS) for (const x of [XW0 - 1.0, XE0 + 1.0]) add('scaffold', x - 0.02, y0, -0.6, x + 0.02, y1 + 0.3, 32.6);
+  }
+  info.finished = finishedAll.length ? Math.min(...finishedAll) : 0;
+  // curtain wall stair glazing when floors finished
+  for (let k = 1; k <= Math.min(6, CUT); k++) { const fc = p('A', k, 'Door', 'Door / Window Leaf'); if (fc >= 1) { const y0 = FL[k - 1], y1 = k < 6 ? FL[k] : ROOF;
+    add('glass', XW - 0.3, y0, 4.0, XW - 0.28, y1, 8.1); add('glass', 7.15, y0, Z1 + 0.25, 9.15, y1, Z1 + 0.27); add('bronze', XW - 0.33, y1 - 0.05, 4.0, XW - 0.27, y1, 8.1); } }
+
+  // ---------------- TOWER CRANE ----------------
+  const craneOn = p('S', 1, 'RC Beam', 'Formwork') > 0 && p('S', 'RW', 'Roof Covering') < 1;
+  if (craneOn && !opts.noCrane) { const cx = -7, cz = 17, H = 30;
+    for (let y = 0; y < H; y += 1.5) { add('crane', cx - 0.8, y, cz - 0.8, cx - 0.7, y + 1.5, cz - 0.7); add('crane', cx + 0.7, y, cz - 0.8, cx + 0.8, y + 1.5, cz - 0.7); add('crane', cx - 0.8, y, cz + 0.7, cx - 0.7, y + 1.5, cz + 0.8); add('crane', cx + 0.7, y, cz + 0.7, cx + 0.8, y + 1.5, cz + 0.8); add('crane', cx - 0.8, y, cz - 0.8, cx + 0.8, y + 0.08, cz + 0.8); }
+    add('crane', cx - 0.9, 0, cz - 0.9, cx + 0.9, 0.6, cz + 0.9);
+    add('crane', cx - 12, H, cz - 0.6, cx + 36, H + 1.4, cz + 0.6); add('crane', cx - 0.9, H + 1.4, cz - 0.9, cx + 0.9, H + 6, cz + 0.9);
+    add('concrete', cx - 11, H - 1.2, cz - 1.2, cx - 7, H, cz + 1.2); add('cab', cx - 1.6, H - 2.2, cz + 0.9, cx - 0.2, H - 0.2, cz + 2.3);
+    add('steel', cx + 24.97, H - 9, cz - 0.03, cx + 25.03, H, cz + 0.03); add('rebarstack', cx + 24.4, H - 9.6, cz - 0.6, cx + 25.6, H - 9, cz + 0.6);
+  }
+
+  for (const k in buckets) { if (!mats[k]) { console.warn('no mat', k); continue; } const m = new THREE.Mesh(merge(buckets[k]), mats[k]); m.castShadow = !mats[k].transparent; m.receiveShadow = true; m.name = k; group.add(m); }
+  return { group, info };
+}
+
+function makeConMaterials(THREE) {
+  const tex = (w, h, draw, rep = [1, 1]) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...rep); return t; };
+  const scaffTex = tex(256, 256, (g, w, h) => { g.clearRect(0, 0, w, h); g.strokeStyle = '#b8bcc2'; g.lineWidth = 5; for (let x = 0; x <= w; x += 128) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); } for (let y = 0; y <= h; y += 128) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); } g.lineWidth = 3; g.beginPath(); g.moveTo(0, h); g.lineTo(w, 0); g.stroke(); g.fillStyle = '#c98a3c'; g.fillRect(0, h - 10, w, 10); }, [16, 3]);
+  const S = (o) => new THREE.MeshStandardMaterial(o);
+  return {
+    concrete: S({ color: 0x9d9c96, roughness: 0.9 }), pile: S({ color: 0x8e8d88, roughness: 0.9 }),
+    formwork: S({ color: 0xc27c33, roughness: 0.8 }), rebar: S({ color: 0x7a3f22, roughness: 0.7, metalness: 0.4 }),
+    rebarmesh: S({ color: 0x7a3f22, roughness: 0.7, metalness: 0.3, transparent: true, opacity: 0.85 }), tendon: S({ color: 0x2c6fb0, roughness: 0.5 }),
+    steelpost: S({ color: 0x9ea4aa, metalness: 0.6, roughness: 0.4 }), steel: S({ color: 0x55606b, metalness: 0.7, roughness: 0.4 }),
+    metalroof: S({ color: 0x8d99a3, metalness: 0.6, roughness: 0.35 }), aac: S({ color: 0xa3afbb, roughness: 0.95 }),
+    plaster: S({ color: 0xe4dccd, roughness: 0.9 }), primer: S({ color: 0xe9e7e2, roughness: 0.85 }), paint: S({ color: 0xf3efe8, roughness: 0.8 }), paintPod: S({ color: 0x7d5434, roughness: 0.6 }),
+    tile: S({ color: 0xc49f74, roughness: 0.5 }), gypsum: S({ color: 0xf6f6f4, roughness: 0.9 }), waterproof: S({ color: 0x51625a, roughness: 0.6 }),
+    bronze: S({ color: 0x4a3826, metalness: 0.85, roughness: 0.3 }), glass: S({ color: 0x29404c, metalness: 0.9, roughness: 0.05, transparent: true, opacity: 0.45 }),
+    rail: S({ color: 0xa9c7cf, metalness: 0.6, roughness: 0.05, transparent: true, opacity: 0.25, depthWrite: false }),
+    scaffold: S({ map: scaffTex, transparent: true, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.6, metalness: 0.4 }),
+    soil: S({ color: 0x7a5a3c, roughness: 1 }), sand: S({ color: 0xc9b48a, roughness: 1 }),
+    fence: S({ color: 0x2f6e9e, roughness: 0.6, metalness: 0.3 }), office: S({ color: 0xe8e8e2, roughness: 0.7 }), camp: S({ color: 0x3b7bbd, roughness: 0.7 }),
+    shed: S({ color: 0x9a9a95, roughness: 0.9 }), roofsheet: S({ color: 0x8aa0b0, metalness: 0.5, roughness: 0.4 }), rebarstack: S({ color: 0x7a3f22, roughness: 0.7 }), blocks: S({ color: 0xd2d6da, roughness: 0.95 }),
+    crane: S({ color: 0xf2b705, roughness: 0.5, metalness: 0.3 }), cab: S({ color: 0x333333, roughness: 0.4 }),
+    wip: S({ color: 0xf28c28, roughness: 0.6, emissive: 0x6a2a00, emissiveIntensity: 0.25 }),
+    ghost: S({ color: 0x7fb2e5, transparent: true, opacity: 0.12, depthWrite: false, roughness: 0.5 }),
+    ghostfloor: S({ color: 0x7fb2e5, transparent: true, opacity: 0.08, depthWrite: false }),
+  };
+}
+
+
+const sched = {"status":"2027-05-22","tasks":[{"g":"P","fl":"Site Preparation","el":"Site Preparation","act":"Survey & Setting Out","bs":"2026-09-01","bf":"2026-09-03","s":"2026-09-01","f":"2026-09-04","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Site Preparation","el":"Site Preparation","act":"Site Clearing","bs":"2026-09-03","bf":"2026-09-08","s":"2026-09-04","f":"2026-09-09","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Site Preparation","el":"Site Preparation","act":"Temporary Fencing","bs":"2026-09-08","bf":"2026-09-11","s":"2026-09-09","f":"2026-09-14","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Temporary Site Office & Facilities","el":"Temporary Site Office & Facilities","act":"Site Office","bs":"2026-09-09","bf":"2026-09-15","s":"2026-09-10","f":"2026-09-16","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Temporary Site Office & Facilities","el":"Temporary Site Office & Facilities","act":"Labor Camp","bs":"2026-09-09","bf":"2026-09-15","s":"2026-09-10","f":"2026-09-16","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Temporary Site Office & Facilities","el":"Temporary Site Office & Facilities","act":"Material Storage","bs":"2026-09-16","bf":"2026-09-19","s":"2026-09-17","f":"2026-09-21","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Temporary Site Office & Facilities","el":"Temporary Site Office & Facilities","act":"Guard House","bs":"2026-09-09","bf":"2026-09-11","s":"2026-09-10","f":"2026-09-12","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Temporary Utilities","el":"Temporary Utilities","act":"Temporary Electrical System","bs":"2026-09-16","bf":"2026-09-21","s":"2026-09-17","f":"2026-09-22","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"P","fl":"Temporary Utilities","el":"Temporary Utilities","act":"Temporary Water Supply","bs":"2026-09-16","bf":"2026-09-21","s":"2026-09-17","f":"2026-09-22","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"S","fl":"FD","el":"Piling system","act":"Pile Driving","bs":"2026-09-12","bf":"2026-09-29","s":"2026-09-07","f":"2026-09-29","as_":"2026-09-07","af":"2026-09-29","pct":100.0,"bc":2150000.0},{"g":"S","fl":"FD","el":"Piling system","act":"Dynamic Load Test","bs":"2026-10-12","bf":"2026-10-14","s":"2026-10-12","f":"2026-10-15","as_":"2026-10-12","af":"2026-10-15","pct":100.0,"bc":30000.0},{"g":"S","fl":"FD","el":"Piling system","act":"Seismic Load Test","bs":"2026-10-12","bf":"2026-10-16","s":"2026-10-12","f":"2026-10-17","as_":"2026-10-12","af":"2026-10-17","pct":100.0,"bc":22500.0},{"g":"S","fl":"FD","el":"Piling system","act":"Pile Cut Off and Remove Out","bs":"2026-10-06","bf":"2026-10-10","s":"2026-10-05","f":"2026-10-10","as_":"2026-10-05","af":"2026-10-10","pct":100.0,"bc":50000.0},{"g":"S","fl":"FD","el":"Excavation work","act":"Soil Excavation","bs":"2026-09-30","bf":"2026-10-07","s":"2026-09-29","f":"2026-10-08","as_":"2026-09-29","af":"2026-10-08","pct":100.0,"bc":35840.0},{"g":"S","fl":"FD","el":"Excavation work","act":"Back Fill","bs":"2026-11-04","bf":"2026-11-06","s":"2026-11-03","f":"2026-11-06","as_":"2026-11-03","af":"2026-11-06","pct":100.0,"bc":18720.0},{"g":"S","fl":"FD","el":"Excavation work","act":"Compaction Sand","bs":"2026-11-07","bf":"2026-11-10","s":"2026-11-09","f":"2026-11-12","as_":"2026-11-09","af":"2026-11-12","pct":100.0,"bc":12624.0},{"g":"S","fl":"FD","el":"Excavation work","act":"Compaction Exist Ground","bs":"2026-11-10","bf":"2026-11-11","s":"2026-11-10","f":"2026-11-11","as_":"2026-11-10","af":"2026-11-11","pct":100.0,"bc":49200.0},{"g":"S","fl":"FD","el":"Excavation work","act":"Plastic Sheet","bs":"2026-11-12","bf":"2026-11-12","s":"2026-11-12","f":"2026-11-12","as_":"2026-11-12","af":"2026-11-12","pct":100.0,"bc":21586.5},{"g":"S","fl":"FD","el":"Footing work","act":"Reinforcement Steel","bs":"2026-10-13","bf":"2026-10-19","s":"2026-10-12","f":"2026-10-20","as_":"2026-10-12","af":"2026-10-20","pct":100.0,"bc":446036.85},{"g":"S","fl":"FD","el":"Footing work","act":"Formwork","bs":"2026-10-15","bf":"2026-10-19","s":"2026-10-14","f":"2026-10-19","as_":"2026-10-14","af":"2026-10-19","pct":100.0,"bc":209476.8},{"g":"S","fl":"FD","el":"Footing work","act":"Concrete","bs":"2026-10-20","bf":"2026-10-21","s":"2026-10-21","f":"2026-10-22","as_":"2026-10-21","af":"2026-10-22","pct":100.0,"bc":386355.0},{"g":"S","fl":"FD","el":"Footing work","act":"Curing & Stripping","bs":"2026-10-22","bf":"2026-10-27","s":"2026-10-24","f":"2026-10-30","as_":"2026-10-24","af":"2026-10-30","pct":100.0,"bc":0},{"g":"S","fl":"FD","el":"Column","act":"Reinforcement Steel","bs":"2026-10-22","bf":"2026-10-24","s":"2026-10-24","f":"2026-10-28","as_":"2026-10-24","af":"2026-10-28","pct":100.0,"bc":21239.85},{"g":"S","fl":"FD","el":"Column","act":"Formwork","bs":"2026-10-26","bf":"2026-10-27","s":"2026-10-27","f":"2026-10-28","as_":"2026-10-27","af":"2026-10-28","pct":100.0,"bc":9975.09},{"g":"S","fl":"FD","el":"Column","act":"Concrete","bs":"2026-10-28","bf":"2026-10-28","s":"2026-10-29","f":"2026-10-29","as_":"2026-10-29","af":"2026-10-29","pct":100.0,"bc":18397.86},{"g":"S","fl":"FD","el":"Column","act":"Curing & Stripping","bs":"2026-10-29","bf":"2026-10-31","s":"2026-10-31","f":"2026-11-04","as_":"2026-10-31","af":"2026-11-04","pct":100.0,"bc":0},{"g":"S","fl":"FD","el":"Lift core - Shear wall (Foundation)","act":"Reinforcement Steel","bs":"2026-10-22","bf":"2026-10-26","s":"2026-10-24","f":"2026-10-29","as_":"2026-10-24","af":"2026-10-29","pct":100.0,"bc":33643.65},{"g":"S","fl":"FD","el":"Lift core - Shear wall (Foundation)","act":"Formwork (Slip Form)","bs":"2026-10-26","bf":"2026-10-29","s":"2026-10-28","f":"2026-11-02","as_":"2026-10-28","af":"2026-11-02","pct":100.0,"bc":31226.64},{"g":"S","fl":"FD","el":"Lift core - Shear wall (Foundation)","act":"Concrete","bs":"2026-10-29","bf":"2026-10-30","s":"2026-11-02","f":"2026-11-03","as_":"2026-11-02","af":"2026-11-03","pct":100.0,"bc":30872.57},{"g":"S","fl":"FD","el":"Lift core - Shear wall (Foundation)","act":"Curing & Stripping","bs":"2026-10-31","bf":"2026-11-03","s":"2026-11-03","f":"2026-11-06","as_":"2026-11-03","af":"2026-11-06","pct":100.0,"bc":0},{"g":"S","fl":1,"el":"RC Beam","act":"Reinforcement Steel","bs":"2026-11-16","bf":"2026-11-18","s":"2026-11-16","f":"2026-11-19","as_":"2026-11-16","af":"2026-11-19","pct":100.0,"bc":84745.61},{"g":"S","fl":1,"el":"RC Beam","act":"Formwork","bs":"2026-11-13","bf":"2026-11-16","s":"2026-11-14","f":"2026-11-18","as_":"2026-11-14","af":"2026-11-18","pct":100.0,"bc":50443.82},{"g":"S","fl":1,"el":"RC Beam","act":"Concrete","bs":"2026-11-23","bf":"2026-11-23","s":"2026-11-23","f":"2026-11-23","as_":"2026-11-23","af":"2026-11-23","pct":100.0,"bc":60532.58},{"g":"S","fl":1,"el":"RC Beam","act":"Curing & Stripping","bs":"2026-11-24","bf":"2026-11-25","s":"2026-11-24","f":"2026-11-25","as_":"2026-11-24","af":"2026-11-25","pct":100.0,"bc":6053.26},{"g":"S","fl":1,"el":"RC Slab","act":"Reinforcement Steel","bs":"2026-11-16","bf":"2026-11-18","s":"2026-11-16","f":"2026-11-19","as_":"2026-11-16","af":"2026-11-19","pct":100.0,"bc":55392.41},{"g":"S","fl":1,"el":"RC Slab","act":"Formwork","bs":"2026-11-13","bf":"2026-11-14","s":"2026-11-14","f":"2026-11-16","as_":"2026-11-14","af":"2026-11-16","pct":100.0,"bc":32069.29},{"g":"S","fl":1,"el":"RC Slab","act":"Concrete","bs":"2026-11-23","bf":"2026-11-23","s":"2026-11-23","f":"2026-11-23","as_":"2026-11-23","af":"2026-11-23","pct":100.0,"bc":53934.72},{"g":"S","fl":1,"el":"RC Slab","act":"Curing & Stripping","bs":"2026-11-24","bf":"2026-11-27","s":"2026-11-24","f":"2026-11-28","as_":"2026-11-24","af":"2026-11-28","pct":100.0,"bc":4373.09},{"g":"S","fl":1,"el":"Post tension system","act":"Reinforcement Steel","bs":"2026-11-16","bf":"2026-11-17","s":"2026-11-16","f":"2026-11-17","as_":"2026-11-16","af":"2026-11-17","pct":100.0,"bc":92225.87},{"g":"S","fl":1,"el":"Post tension system","act":"Duct / Sheath Installation","bs":"2026-11-18","bf":"2026-11-19","s":"2026-11-18","f":"2026-11-19","as_":"2026-11-18","af":"2026-11-19","pct":100.0,"bc":42565.78},{"g":"S","fl":1,"el":"Post tension system","act":"Tendon / Strand Installation","bs":"2026-11-20","bf":"2026-11-21","s":"2026-11-21","f":"2026-11-23","as_":"2026-11-21","af":"2026-11-23","pct":100.0,"bc":92225.87},{"g":"S","fl":1,"el":"Post tension system","act":"Anchorage System","bs":"2026-11-21","bf":"2026-11-21","s":"2026-11-23","f":"2026-11-23","as_":"2026-11-23","af":"2026-11-23","pct":100.0,"bc":35471.49},{"g":"S","fl":1,"el":"Post tension system","act":"Formwork","bs":"2026-11-13","bf":"2026-11-14","s":"2026-11-14","f":"2026-11-16","as_":"2026-11-14","af":"2026-11-16","pct":100.0,"bc":35471.49},{"g":"S","fl":1,"el":"Post tension system","act":"Concrete Work","bs":"2026-11-23","bf":"2026-11-23","s":"2026-11-23","f":"2026-11-23","as_":"2026-11-23","af":"2026-11-23","pct":100.0,"bc":354714.87},{"g":"S","fl":1,"el":"Post tension system","act":"Stressing / Tensioning","bs":"2026-11-27","bf":"2026-11-28","s":"2026-11-28","f":"2026-11-30","as_":"2026-11-28","af":"2026-11-30","pct":100.0,"bc":28377.19},{"g":"S","fl":1,"el":"Post tension system","act":"Grouting / Corrosion Protection","bs":"2026-11-27","bf":"2026-11-28","s":"2026-11-28","f":"2026-11-30","as_":"2026-11-28","af":"2026-11-30","pct":100.0,"bc":21282.89},{"g":"S","fl":1,"el":"Post tension system","act":"QC & Testing","bs":"2026-11-28","bf":"2026-11-28","s":"2026-11-30","f":"2026-11-30","as_":"2026-11-30","af":"2026-11-30","pct":100.0,"bc":7094.3},{"g":"S","fl":1,"el":"Column","act":"Reinforcement Steel","bs":"2026-11-26","bf":"2026-11-28","s":"2026-11-26","f":"2026-11-30","as_":"2026-11-26","af":"2026-11-30","pct":100.0,"bc":198445.12},{"g":"S","fl":1,"el":"Column","act":"Formwork","bs":"2026-11-30","bf":"2026-12-01","s":"2026-11-30","f":"2026-12-01","as_":"2026-11-30","af":"2026-12-01","pct":100.0,"bc":12403.2},{"g":"S","fl":1,"el":"Column","act":"Concrete","bs":"2026-12-02","bf":"2026-12-02","s":"2026-12-02","f":"2026-12-02","as_":"2026-12-02","af":"2026-12-02","pct":100.0,"bc":158766.09},{"g":"S","fl":1,"el":"Column","act":"Curing & Stripping","bs":"2026-12-03","bf":"2026-12-05","s":"2026-12-03","f":"2026-12-07","as_":"2026-12-03","af":"2026-12-07","pct":100.0,"bc":1788.38},{"g":"S","fl":1,"el":"Lift core - Shear wall (1st FL)","act":"Reinforcement Steel","bs":"2026-11-26","bf":"2026-11-28","s":"2026-11-26","f":"2026-11-30","as_":"2026-11-26","af":"2026-11-30","pct":100.0,"bc":33510.0},{"g":"S","fl":1,"el":"Lift core - Shear wall (1st FL)","act":"Formwork (Slip Form)","bs":"2026-11-30","bf":"2026-12-02","s":"2026-11-30","f":"2026-12-03","as_":"2026-11-30","af":"2026-12-03","pct":100.0,"bc":30637.72},{"g":"S","fl":1,"el":"Lift core - Shear wall (1st FL)","act":"Concrete","bs":"2026-12-03","bf":"2026-12-03","s":"2026-12-05","f":"2026-12-05","as_":"2026-12-05","af":"2026-12-05","pct":100.0,"bc":28722.86},{"g":"S","fl":1,"el":"Lift core - Shear wall (1st FL)","act":"Curing & Stripping","bs":"2026-12-04","bf":"2026-12-05","s":"2026-12-07","f":"2026-12-08","as_":"2026-12-07","af":"2026-12-08","pct":100.0,"bc":2872.29},{"g":"S","fl":1,"el":"Stair structure (GF - 1st FL)","act":"Reinforcement Steel","bs":"2026-12-05","bf":"2026-12-07","s":"2026-12-07","f":"2026-12-08","as_":"2026-12-07","af":"2026-12-08","pct":100.0,"bc":50090.25},{"g":"S","fl":1,"el":"Stair structure (GF - 1st FL)","act":"Formwork","bs":"2026-12-03","bf":"2026-12-04","s":"2026-12-03","f":"2026-12-04","as_":"2026-12-03","af":"2026-12-04","pct":100.0,"bc":35778.75},{"g":"S","fl":1,"el":"Stair structure (GF - 1st FL)","act":"Concrete","bs":"2026-12-08","bf":"2026-12-08","s":"2026-12-08","f":"2026-12-08","as_":"2026-12-08","af":"2026-12-08","pct":100.0,"bc":52952.55},{"g":"S","fl":1,"el":"Stair structure (GF - 1st FL)","act":"Curing & Stripping","bs":"2026-12-09","bf":"2026-12-10","s":"2026-12-09","f":"2026-12-10","as_":"2026-12-09","af":"2026-12-10","pct":100.0,"bc":4293.45},{"g":"S","fl":2,"el":"RC Beam","act":"Reinforcement Steel","bs":"2026-12-09","bf":"2026-12-11","s":"2026-12-10","f":"2026-12-14","as_":"2026-12-10","af":"2026-12-14","pct":100.0,"bc":84745.61},{"g":"S","fl":2,"el":"RC Beam","act":"Formwork","bs":"2026-12-07","bf":"2026-12-09","s":"2026-12-08","f":"2026-12-11","as_":"2026-12-08","af":"2026-12-11","pct":100.0,"bc":50443.82},{"g":"S","fl":2,"el":"RC Beam","act":"Concrete","bs":"2026-12-16","bf":"2026-12-16","s":"2026-12-17","f":"2026-12-17","as_":"2026-12-17","af":"2026-12-17","pct":100.0,"bc":60532.58},{"g":"S","fl":2,"el":"RC Beam","act":"Curing & Stripping","bs":"2026-12-17","bf":"2026-12-18","s":"2026-12-19","f":"2026-12-21","as_":"2026-12-19","af":"2026-12-21","pct":100.0,"bc":6053.26},{"g":"S","fl":2,"el":"RC Slab","act":"Reinforcement Steel","bs":"2026-12-09","bf":"2026-12-11","s":"2026-12-10","f":"2026-12-14","as_":"2026-12-10","af":"2026-12-14","pct":100.0,"bc":55392.41},{"g":"S","fl":2,"el":"RC Slab","act":"Formwork","bs":"2026-12-07","bf":"2026-12-08","s":"2026-12-08","f":"2026-12-09","as_":"2026-12-08","af":"2026-12-09","pct":100.0,"bc":32069.29},{"g":"S","fl":2,"el":"RC Slab","act":"Concrete","bs":"2026-12-16","bf":"2026-12-16","s":"2026-12-17","f":"2026-12-17","as_":"2026-12-17","af":"2026-12-17","pct":100.0,"bc":53934.72},{"g":"S","fl":2,"el":"RC Slab","act":"Curing & Stripping","bs":"2026-12-17","bf":"2026-12-21","s":"2026-12-19","f":"2026-12-24","as_":"2026-12-19","af":"2026-12-24","pct":100.0,"bc":4373.09},{"g":"S","fl":2,"el":"Post tension system","act":"Reinforcement Steel","bs":"2026-12-09","bf":"2026-12-10","s":"2026-12-10","f":"2026-12-11","as_":"2026-12-10","af":"2026-12-11","pct":100.0,"bc":92225.87},{"g":"S","fl":2,"el":"Post tension system","act":"Duct / Sheath Installation","bs":"2026-12-11","bf":"2026-12-12","s":"2026-12-14","f":"2026-12-15","as_":"2026-12-14","af":"2026-12-15","pct":100.0,"bc":42565.78},{"g":"S","fl":2,"el":"Post tension system","act":"Tendon / Strand Installation","bs":"2026-12-14","bf":"2026-12-15","s":"2026-12-15","f":"2026-12-16","as_":"2026-12-15","af":"2026-12-16","pct":100.0,"bc":92225.87},{"g":"S","fl":2,"el":"Post tension system","act":"Anchorage System","bs":"2026-12-15","bf":"2026-12-15","s":"2026-12-16","f":"2026-12-16","as_":"2026-12-16","af":"2026-12-16","pct":100.0,"bc":35471.49},{"g":"S","fl":2,"el":"Post tension system","act":"Formwork (Table Form)","bs":"2026-12-07","bf":"2026-12-08","s":"2026-12-08","f":"2026-12-09","as_":"2026-12-08","af":"2026-12-09","pct":100.0,"bc":35471.49},{"g":"S","fl":2,"el":"Post tension system","act":"Concrete Work","bs":"2026-12-16","bf":"2026-12-16","s":"2026-12-17","f":"2026-12-17","as_":"2026-12-17","af":"2026-12-17","pct":100.0,"bc":354714.87},{"g":"S","fl":2,"el":"Post tension system","act":"Stressing / Tensioning","bs":"2026-12-21","bf":"2026-12-22","s":"2026-12-26","f":"2026-12-28","as_":"2026-12-26","af":"2026-12-28","pct":100.0,"bc":28377.19},{"g":"S","fl":2,"el":"Post tension system","act":"Grouting / Corrosion Protection","bs":"2026-12-21","bf":"2026-12-22","s":"2026-12-26","f":"2026-12-28","as_":"2026-12-26","af":"2026-12-28","pct":100.0,"bc":21282.89},{"g":"S","fl":2,"el":"Post tension system","act":"QC & Testing","bs":"2026-12-22","bf":"2026-12-22","s":"2026-12-28","f":"2026-12-28","as_":"2026-12-28","af":"2026-12-28","pct":100.0,"bc":7094.3},{"g":"S","fl":2,"el":"Column","act":"Reinforcement Steel","bs":"2026-12-19","bf":"2026-12-22","s":"2026-12-21","f":"2026-12-24","as_":"2026-12-21","af":"2026-12-24","pct":100.0,"bc":198445.12},{"g":"S","fl":2,"el":"Column","act":"Formwork","bs":"2026-12-23","bf":"2026-12-24","s":"2026-12-28","f":"2026-12-29","as_":"2026-12-28","af":"2026-12-29","pct":100.0,"bc":12403.2},{"g":"S","fl":2,"el":"Column","act":"Concrete","bs":"2026-12-25","bf":"2026-12-25","s":"2026-12-30","f":"2026-12-30","as_":"2026-12-30","af":"2026-12-30","pct":100.0,"bc":158766.09},{"g":"S","fl":2,"el":"Column","act":"Curing & Stripping","bs":"2026-12-26","bf":"2026-12-29","s":"2027-01-04","f":"2027-01-07","as_":"2027-01-04","af":"2027-01-07","pct":100.0,"bc":1788.38},{"g":"S","fl":2,"el":"Lift core - Shear wall (2nd FL)","act":"Reinforcement Steel","bs":"2026-12-19","bf":"2026-12-22","s":"2026-12-21","f":"2026-12-24","as_":"2026-12-21","af":"2026-12-24","pct":100.0,"bc":33510.0},{"g":"S","fl":2,"el":"Lift core - Shear wall (2nd FL)","act":"Formwork (Slip Form)","bs":"2026-12-23","bf":"2026-12-25","s":"2026-12-28","f":"2027-01-04","as_":"2026-12-28","af":"2027-01-04","pct":100.0,"bc":30637.72},{"g":"S","fl":2,"el":"Lift core - Shear wall (2nd FL)","act":"Concrete","bs":"2026-12-26","bf":"2026-12-26","s":"2027-01-04","f":"2027-01-04","as_":"2027-01-04","af":"2027-01-04","pct":100.0,"bc":28722.86},{"g":"S","fl":2,"el":"Lift core - Shear wall (2nd FL)","act":"Curing & Stripping","bs":"2026-12-28","bf":"2026-12-29","s":"2027-01-04","f":"2027-01-05","as_":"2027-01-04","af":"2027-01-05","pct":100.0,"bc":2872.29},{"g":"S","fl":2,"el":"Stair structure (1st FL - 2nd FL)","act":"Reinforcement Steel","bs":"2026-12-29","bf":"2026-12-30","s":"2027-01-04","f":"2027-01-05","as_":"2027-01-04","af":"2027-01-05","pct":100.0,"bc":50090.25},{"g":"S","fl":2,"el":"Stair structure (1st FL - 2nd FL)","act":"Formwork","bs":"2026-12-26","bf":"2026-12-28","s":"2027-01-04","f":"2027-01-05","as_":"2027-01-04","af":"2027-01-05","pct":100.0,"bc":35778.75},{"g":"S","fl":2,"el":"Stair structure (1st FL - 2nd FL)","act":"Concrete","bs":"2027-01-04","bf":"2027-01-04","s":"2027-01-05","f":"2027-01-05","as_":"2027-01-05","af":"2027-01-05","pct":100.0,"bc":52952.55},{"g":"S","fl":2,"el":"Stair structure (1st FL - 2nd FL)","act":"Curing & Stripping","bs":"2027-01-05","bf":"2027-01-06","s":"2027-01-06","f":"2027-01-07","as_":"2027-01-06","af":"2027-01-07","pct":100.0,"bc":4293.45},{"g":"S","fl":3,"el":"RC Beam","act":"Reinforcement Steel","bs":"2027-01-05","bf":"2027-01-07","s":"2027-01-07","f":"2027-01-11","as_":"2027-01-07","af":"2027-01-11","pct":100.0,"bc":84745.61},{"g":"S","fl":3,"el":"RC Beam","act":"Formwork","bs":"2026-12-30","bf":"2027-01-05","s":"2027-01-05","f":"2027-01-08","as_":"2027-01-05","af":"2027-01-08","pct":100.0,"bc":50443.82},{"g":"S","fl":3,"el":"RC Beam","act":"Concrete","bs":"2027-01-12","bf":"2027-01-12","s":"2027-01-14","f":"2027-01-14","as_":"2027-01-14","af":"2027-01-14","pct":100.0,"bc":60532.58},{"g":"S","fl":3,"el":"RC Beam","act":"Curing & Stripping","bs":"2027-01-13","bf":"2027-01-14","s":"2027-01-16","f":"2027-01-18","as_":"2027-01-16","af":"2027-01-18","pct":100.0,"bc":6053.26},{"g":"S","fl":3,"el":"RC Slab","act":"Reinforcement Steel","bs":"2027-01-05","bf":"2027-01-07","s":"2027-01-07","f":"2027-01-11","as_":"2027-01-07","af":"2027-01-11","pct":100.0,"bc":55392.41},{"g":"S","fl":3,"el":"RC Slab","act":"Formwork","bs":"2026-12-30","bf":"2027-01-04","s":"2027-01-05","f":"2027-01-08","as_":"2027-01-05","af":null,"pct":50.0,"bc":32069.29},{"g":"S","fl":3,"el":"RC Slab","act":"Concrete","bs":"2027-01-12","bf":"2027-01-12","s":"2027-01-14","f":"2027-01-14","as_":"2027-01-14","af":"2027-01-14","pct":100.0,"bc":53934.72},{"g":"S","fl":3,"el":"RC Slab","act":"Curing & Stripping","bs":"2027-01-13","bf":"2027-01-16","s":"2027-01-16","f":"2027-01-21","as_":"2027-01-16","af":"2027-01-21","pct":100.0,"bc":4373.09},{"g":"S","fl":3,"el":"Post tension system","act":"Reinforcement Steel","bs":"2027-01-05","bf":"2027-01-06","s":"2027-01-07","f":"2027-01-08","as_":"2027-01-07","af":"2027-01-08","pct":100.0,"bc":92225.87},{"g":"S","fl":3,"el":"Post tension system","act":"Duct / Sheath Installation","bs":"2027-01-07","bf":"2027-01-08","s":"2027-01-11","f":"2027-01-12","as_":"2027-01-11","af":"2027-01-12","pct":100.0,"bc":42565.78},{"g":"S","fl":3,"el":"Post tension system","act":"Tendon / Strand Installation","bs":"2027-01-09","bf":"2027-01-11","s":"2027-01-12","f":"2027-01-13","as_":"2027-01-12","af":"2027-01-13","pct":100.0,"bc":92225.87},{"g":"S","fl":3,"el":"Post tension system","act":"Anchorage System","bs":"2027-01-11","bf":"2027-01-11","s":"2027-01-13","f":"2027-01-13","as_":"2027-01-13","af":"2027-01-13","pct":100.0,"bc":35471.49},{"g":"S","fl":3,"el":"Post tension system","act":"Formwork (Table Form)","bs":"2026-12-30","bf":"2027-01-04","s":"2027-01-05","f":"2027-01-06","as_":"2027-01-05","af":"2027-01-06","pct":100.0,"bc":35471.49},{"g":"S","fl":3,"el":"Post tension system","act":"Concrete Work","bs":"2027-01-12","bf":"2027-01-12","s":"2027-01-14","f":"2027-01-14","as_":"2027-01-14","af":"2027-01-14","pct":100.0,"bc":354714.87},{"g":"S","fl":3,"el":"Post tension system","act":"Stressing / Tensioning","bs":"2027-01-16","bf":"2027-01-18","s":"2027-01-19","f":"2027-01-20","as_":"2027-01-19","af":"2027-01-20","pct":100.0,"bc":28377.19},{"g":"S","fl":3,"el":"Post tension system","act":"Grouting / Corrosion Protection","bs":"2027-01-16","bf":"2027-01-18","s":"2027-01-19","f":"2027-01-20","as_":"2027-01-19","af":"2027-01-20","pct":100.0,"bc":21282.89},{"g":"S","fl":3,"el":"Post tension system","act":"QC & Testing","bs":"2027-01-18","bf":"2027-01-18","s":"2027-01-20","f":"2027-01-20","as_":"2027-01-20","af":"2027-01-20","pct":100.0,"bc":7094.3},{"g":"S","fl":3,"el":"Column","act":"Reinforcement Steel","bs":"2027-01-15","bf":"2027-01-18","s":"2027-01-18","f":"2027-01-21","as_":"2027-01-18","af":"2027-01-21","pct":100.0,"bc":198445.12},{"g":"S","fl":3,"el":"Column","act":"Formwork","bs":"2027-01-19","bf":"2027-01-20","s":"2027-01-21","f":"2027-01-22","as_":"2027-01-21","af":"2027-01-22","pct":100.0,"bc":12403.2},{"g":"S","fl":3,"el":"Column","act":"Concrete","bs":"2027-01-21","bf":"2027-01-21","s":"2027-01-25","f":"2027-01-25","as_":"2027-01-25","af":"2027-01-25","pct":100.0,"bc":158766.09},{"g":"S","fl":3,"el":"Column","act":"Curing & Stripping","bs":"2027-01-22","bf":"2027-01-25","s":"2027-01-25","f":"2027-01-28","as_":"2027-01-25","af":"2027-01-28","pct":100.0,"bc":1788.38},{"g":"S","fl":3,"el":"Lift core - Shear wall (3nd FL)","act":"Reinforcement Steel","bs":"2027-01-15","bf":"2027-01-18","s":"2027-01-18","f":"2027-01-21","as_":"2027-01-18","af":"2027-01-21","pct":100.0,"bc":33510.0},{"g":"S","fl":3,"el":"Lift core - Shear wall (3nd FL)","act":"Formwork (Slip Form)","bs":"2027-01-19","bf":"2027-01-21","s":"2027-01-21","f":"2027-01-25","as_":"2027-01-21","af":"2027-01-25","pct":100.0,"bc":30637.72},{"g":"S","fl":3,"el":"Lift core - Shear wall (3nd FL)","act":"Concrete","bs":"2027-01-22","bf":"2027-01-22","s":"2027-01-26","f":"2027-01-26","as_":"2027-01-26","af":"2027-01-26","pct":100.0,"bc":28722.86},{"g":"S","fl":3,"el":"Lift core - Shear wall (3nd FL)","act":"Curing & Stripping","bs":"2027-01-23","bf":"2027-01-25","s":"2027-01-27","f":"2027-01-28","as_":"2027-01-27","af":"2027-01-28","pct":100.0,"bc":2872.29},{"g":"S","fl":3,"el":"Stair structure (2nd FL - 3nd FL)","act":"Reinforcement Steel","bs":"2027-01-25","bf":"2027-01-26","s":"2027-01-27","f":"2027-01-28","as_":"2027-01-27","af":"2027-01-28","pct":100.0,"bc":50090.25},{"g":"S","fl":3,"el":"Stair structure (2nd FL - 3nd FL)","act":"Formwork","bs":"2027-01-22","bf":"2027-01-23","s":"2027-01-25","f":"2027-01-26","as_":"2027-01-25","af":"2027-01-26","pct":100.0,"bc":35778.75},{"g":"S","fl":3,"el":"Stair structure (2nd FL - 3nd FL)","act":"Concrete","bs":"2027-01-27","bf":"2027-01-27","s":"2027-01-30","f":"2027-01-30","as_":"2027-01-30","af":"2027-01-30","pct":100.0,"bc":52952.55},{"g":"S","fl":3,"el":"Stair structure (2nd FL - 3nd FL)","act":"Curing & Stripping","bs":"2027-01-28","bf":"2027-01-29","s":"2027-02-01","f":"2027-02-02","as_":"2027-02-01","af":"2027-02-02","pct":100.0,"bc":4293.45},{"g":"S","fl":4,"el":"RC Beam","act":"Reinforcement Steel","bs":"2027-01-28","bf":"2027-01-30","s":"2027-02-01","f":"2027-02-04","as_":"2027-02-01","af":"2027-02-04","pct":100.0,"bc":84745.61},{"g":"S","fl":4,"el":"RC Beam","act":"Formwork","bs":"2027-01-26","bf":"2027-01-28","s":"2027-01-30","f":"2027-02-03","as_":"2027-01-30","af":"2027-02-03","pct":100.0,"bc":50443.82},{"g":"S","fl":4,"el":"RC Beam","act":"Concrete","bs":"2027-02-04","bf":"2027-02-04","s":"2027-02-08","f":"2027-02-08","as_":"2027-02-08","af":"2027-02-08","pct":100.0,"bc":60532.58},{"g":"S","fl":4,"el":"RC Beam","act":"Curing & Stripping","bs":"2027-02-05","bf":"2027-02-06","s":"2027-02-09","f":"2027-02-10","as_":"2027-02-09","af":"2027-02-10","pct":100.0,"bc":6053.26},{"g":"S","fl":4,"el":"RC Slab","act":"Reinforcement Steel","bs":"2027-01-28","bf":"2027-01-30","s":"2027-02-01","f":"2027-02-04","as_":"2027-02-01","af":"2027-02-04","pct":100.0,"bc":55392.41},{"g":"S","fl":4,"el":"RC Slab","act":"Formwork","bs":"2027-01-26","bf":"2027-01-27","s":"2027-01-30","f":"2027-02-01","as_":"2027-01-30","af":"2027-02-01","pct":100.0,"bc":32069.29},{"g":"S","fl":4,"el":"RC Slab","act":"Concrete","bs":"2027-02-04","bf":"2027-02-04","s":"2027-02-08","f":"2027-02-08","as_":"2027-02-08","af":"2027-02-08","pct":100.0,"bc":53934.72},{"g":"S","fl":4,"el":"RC Slab","act":"Curing & Stripping","bs":"2027-02-05","bf":"2027-02-09","s":"2027-02-09","f":"2027-02-13","as_":"2027-02-09","af":"2027-02-13","pct":100.0,"bc":4373.09},{"g":"S","fl":4,"el":"Post tension system","act":"Reinforcement Steel","bs":"2027-01-28","bf":"2027-01-29","s":"2027-02-01","f":"2027-02-02","as_":"2027-02-01","af":"2027-02-02","pct":100.0,"bc":92225.87},{"g":"S","fl":4,"el":"Post tension system","act":"Duct / Sheath Installation","bs":"2027-01-30","bf":"2027-02-01","s":"2027-02-03","f":"2027-02-04","as_":"2027-02-03","af":"2027-02-04","pct":100.0,"bc":42565.78},{"g":"S","fl":4,"el":"Post tension system","act":"Tendon / Strand Installation","bs":"2027-02-02","bf":"2027-02-03","s":"2027-02-06","f":"2027-02-08","as_":"2027-02-06","af":"2027-02-08","pct":100.0,"bc":92225.87},{"g":"S","fl":4,"el":"Post tension system","act":"Anchorage System","bs":"2027-02-03","bf":"2027-02-03","s":"2027-02-08","f":"2027-02-08","as_":"2027-02-08","af":"2027-02-08","pct":100.0,"bc":35471.49},{"g":"S","fl":4,"el":"Post tension system","act":"Formwork (Table Form)","bs":"2027-01-26","bf":"2027-01-27","s":"2027-01-30","f":"2027-02-01","as_":"2027-01-30","af":"2027-02-01","pct":100.0,"bc":35471.49},{"g":"S","fl":4,"el":"Post tension system","act":"Concrete Work","bs":"2027-02-04","bf":"2027-02-04","s":"2027-02-08","f":"2027-02-08","as_":"2027-02-08","af":"2027-02-08","pct":100.0,"bc":354714.87},{"g":"S","fl":4,"el":"Post tension system","act":"Stressing / Tensioning","bs":"2027-02-09","bf":"2027-02-10","s":"2027-02-13","f":"2027-02-15","as_":"2027-02-13","af":"2027-02-15","pct":100.0,"bc":28377.19},{"g":"S","fl":4,"el":"Post tension system","act":"Grouting / Corrosion Protection","bs":"2027-02-09","bf":"2027-02-10","s":"2027-02-13","f":"2027-02-15","as_":"2027-02-13","af":"2027-02-15","pct":100.0,"bc":21282.89},{"g":"S","fl":4,"el":"Post tension system","act":"QC & Testing","bs":"2027-02-10","bf":"2027-02-10","s":"2027-02-15","f":"2027-02-15","as_":"2027-02-15","af":"2027-02-15","pct":100.0,"bc":7094.3},{"g":"S","fl":4,"el":"Column","act":"Reinforcement Steel","bs":"2027-02-08","bf":"2027-02-10","s":"2027-02-11","f":"2027-02-15","as_":"2027-02-11","af":"2027-02-15","pct":100.0,"bc":198445.12},{"g":"S","fl":4,"el":"Column","act":"Formwork","bs":"2027-02-11","bf":"2027-02-12","s":"2027-02-15","f":"2027-02-16","as_":"2027-02-15","af":"2027-02-16","pct":100.0,"bc":12403.2},{"g":"S","fl":4,"el":"Column","act":"Concrete","bs":"2027-02-13","bf":"2027-02-13","s":"2027-02-17","f":"2027-02-17","as_":"2027-02-17","af":"2027-02-17","pct":100.0,"bc":158766.09},{"g":"S","fl":4,"el":"Column","act":"Curing & Stripping","bs":"2027-02-15","bf":"2027-02-17","s":"2027-02-18","f":"2027-02-22","as_":"2027-02-18","af":"2027-02-22","pct":100.0,"bc":1788.38},{"g":"S","fl":4,"el":"Lift core - Shear wall (4nd FL)","act":"Reinforcement Steel","bs":"2027-02-08","bf":"2027-02-10","s":"2027-02-11","f":"2027-02-15","as_":"2027-02-11","af":"2027-02-15","pct":100.0,"bc":33510.0},{"g":"S","fl":4,"el":"Lift core - Shear wall (4nd FL)","act":"Formwork (Slip Form)","bs":"2027-02-11","bf":"2027-02-13","s":"2027-02-15","f":"2027-02-18","as_":"2027-02-15","af":"2027-02-18","pct":100.0,"bc":30637.72},{"g":"S","fl":4,"el":"Lift core - Shear wall (4nd FL)","act":"Concrete","bs":"2027-02-15","bf":"2027-02-15","s":"2027-02-20","f":"2027-02-20","as_":"2027-02-20","af":"2027-02-20","pct":100.0,"bc":28722.86},{"g":"S","fl":4,"el":"Lift core - Shear wall (4nd FL)","act":"Curing & Stripping","bs":"2027-02-16","bf":"2027-02-17","s":"2027-02-22","f":"2027-02-23","as_":"2027-02-22","af":"2027-02-23","pct":100.0,"bc":2872.29},{"g":"S","fl":4,"el":"Stair structure (3nd FL - 4nd FL)","act":"Reinforcement Steel","bs":"2027-02-17","bf":"2027-02-18","s":"2027-02-22","f":"2027-02-23","as_":"2027-02-22","af":"2027-02-23","pct":100.0,"bc":50090.25},{"g":"S","fl":4,"el":"Stair structure (3nd FL - 4nd FL)","act":"Formwork","bs":"2027-02-15","bf":"2027-02-16","s":"2027-02-18","f":"2027-02-19","as_":"2027-02-18","af":"2027-02-19","pct":100.0,"bc":35778.75},{"g":"S","fl":4,"el":"Stair structure (3nd FL - 4nd FL)","act":"Concrete","bs":"2027-02-19","bf":"2027-02-19","s":"2027-02-23","f":"2027-02-23","as_":"2027-02-23","af":"2027-02-23","pct":100.0,"bc":52952.55},{"g":"S","fl":4,"el":"Stair structure (3nd FL - 4nd FL)","act":"Curing & Stripping","bs":"2027-02-20","bf":"2027-02-22","s":"2027-02-24","f":"2027-02-25","as_":"2027-02-24","af":"2027-02-25","pct":100.0,"bc":4293.45},{"g":"S","fl":5,"el":"RC Beam","act":"Reinforcement Steel","bs":"2027-02-20","bf":"2027-02-23","s":"2027-02-25","f":"2027-03-01","as_":"2027-02-25","af":"2027-03-01","pct":100.0,"bc":84745.61},{"g":"S","fl":5,"el":"RC Beam","act":"Formwork","bs":"2027-02-18","bf":"2027-02-20","s":"2027-02-23","f":"2027-02-26","as_":"2027-02-23","af":"2027-02-26","pct":100.0,"bc":50443.82},{"g":"S","fl":5,"el":"RC Beam","act":"Concrete","bs":"2027-02-27","bf":"2027-02-27","s":"2027-03-04","f":"2027-03-04","as_":"2027-03-04","af":"2027-03-04","pct":100.0,"bc":60532.58},{"g":"S","fl":5,"el":"RC Beam","act":"Curing & Stripping","bs":"2027-03-01","bf":"2027-03-02","s":"2027-03-06","f":"2027-03-08","as_":"2027-03-06","af":"2027-03-08","pct":100.0,"bc":6053.26},{"g":"S","fl":5,"el":"RC Slab","act":"Reinforcement Steel","bs":"2027-02-20","bf":"2027-02-23","s":"2027-02-25","f":"2027-03-01","as_":"2027-02-25","af":"2027-03-01","pct":100.0,"bc":55392.41},{"g":"S","fl":5,"el":"RC Slab","act":"Formwork","bs":"2027-02-18","bf":"2027-02-19","s":"2027-02-23","f":"2027-02-24","as_":"2027-02-23","af":"2027-02-24","pct":100.0,"bc":32069.29},{"g":"S","fl":5,"el":"RC Slab","act":"Concrete","bs":"2027-02-27","bf":"2027-02-27","s":"2027-03-04","f":"2027-03-04","as_":"2027-03-04","af":"2027-03-04","pct":100.0,"bc":53934.72},{"g":"S","fl":5,"el":"RC Slab","act":"Curing & Stripping","bs":"2027-03-01","bf":"2027-03-04","s":"2027-03-06","f":"2027-03-11","as_":"2027-03-06","af":"2027-03-11","pct":100.0,"bc":4373.09},{"g":"S","fl":5,"el":"Post tension system","act":"Reinforcement Steel","bs":"2027-02-20","bf":"2027-02-22","s":"2027-02-25","f":"2027-02-26","as_":"2027-02-25","af":"2027-02-26","pct":100.0,"bc":92225.87},{"g":"S","fl":5,"el":"Post tension system","act":"Duct / Sheath Installation","bs":"2027-02-23","bf":"2027-02-24","s":"2027-03-01","f":"2027-03-02","as_":"2027-03-01","af":"2027-03-02","pct":100.0,"bc":42565.78},{"g":"S","fl":5,"el":"Post tension system","act":"Tendon / Strand Installation","bs":"2027-02-25","bf":"2027-02-26","s":"2027-03-02","f":"2027-03-03","as_":"2027-03-02","af":"2027-03-03","pct":100.0,"bc":92225.87},{"g":"S","fl":5,"el":"Post tension system","act":"Anchorage System","bs":"2027-02-26","bf":"2027-02-26","s":"2027-03-03","f":"2027-03-03","as_":"2027-03-03","af":"2027-03-03","pct":100.0,"bc":35471.49},{"g":"S","fl":5,"el":"Post tension system","act":"Formwork (Table Form)","bs":"2027-02-18","bf":"2027-02-19","s":"2027-02-23","f":"2027-02-24","as_":"2027-02-23","af":"2027-02-24","pct":100.0,"bc":35471.49},{"g":"S","fl":5,"el":"Post tension system","act":"Concrete Work","bs":"2027-02-27","bf":"2027-02-27","s":"2027-03-04","f":"2027-03-04","as_":"2027-03-04","af":"2027-03-04","pct":100.0,"bc":354714.87},{"g":"S","fl":5,"el":"Post tension system","act":"Stressing / Tensioning","bs":"2027-03-04","bf":"2027-03-05","s":"2027-03-09","f":"2027-03-10","as_":"2027-03-09","af":"2027-03-10","pct":100.0,"bc":28377.19},{"g":"S","fl":5,"el":"Post tension system","act":"Grouting / Corrosion Protection","bs":"2027-03-04","bf":"2027-03-05","s":"2027-03-09","f":"2027-03-10","as_":"2027-03-09","af":"2027-03-10","pct":100.0,"bc":21282.89},{"g":"S","fl":5,"el":"Post tension system","act":"QC & Testing","bs":"2027-03-05","bf":"2027-03-05","s":"2027-03-10","f":"2027-03-10","as_":"2027-03-10","af":"2027-03-10","pct":100.0,"bc":7094.3},{"g":"S","fl":5,"el":"Column","act":"Reinforcement Steel","bs":"2027-03-03","bf":"2027-03-05","s":"2027-03-08","f":"2027-03-11","as_":"2027-03-08","af":"2027-03-11","pct":100.0,"bc":198445.12},{"g":"S","fl":5,"el":"Column","act":"Formwork","bs":"2027-03-06","bf":"2027-03-08","s":"2027-03-11","f":"2027-03-12","as_":"2027-03-11","af":"2027-03-12","pct":100.0,"bc":12403.2},{"g":"S","fl":5,"el":"Column","act":"Concrete","bs":"2027-03-09","bf":"2027-03-09","s":"2027-03-15","f":"2027-03-15","as_":"2027-03-15","af":"2027-03-15","pct":100.0,"bc":158766.09},{"g":"S","fl":5,"el":"Column","act":"Curing & Stripping","bs":"2027-03-10","bf":"2027-03-12","s":"2027-03-15","f":"2027-03-18","as_":"2027-03-15","af":"2027-03-18","pct":100.0,"bc":1788.38},{"g":"S","fl":5,"el":"Lift core - Shear wall (5nd FL)","act":"Reinforcement Steel","bs":"2027-03-03","bf":"2027-03-05","s":"2027-03-08","f":"2027-03-11","as_":"2027-03-08","af":"2027-03-11","pct":100.0,"bc":33510.0},{"g":"S","fl":5,"el":"Lift core - Shear wall (5nd FL)","act":"Formwork (Slip Form)","bs":"2027-03-06","bf":"2027-03-09","s":"2027-03-11","f":"2027-03-15","as_":"2027-03-11","af":"2027-03-15","pct":100.0,"bc":30637.72},{"g":"S","fl":5,"el":"Lift core - Shear wall (5nd FL)","act":"Concrete","bs":"2027-03-10","bf":"2027-03-10","s":"2027-03-16","f":"2027-03-16","as_":"2027-03-16","af":"2027-03-16","pct":100.0,"bc":28722.86},{"g":"S","fl":5,"el":"Lift core - Shear wall (5nd FL)","act":"Curing & Stripping","bs":"2027-03-11","bf":"2027-03-12","s":"2027-03-17","f":"2027-03-18","as_":"2027-03-17","af":"2027-03-18","pct":100.0,"bc":2872.29},{"g":"S","fl":5,"el":"Stair structure (4nd FL - 5nd FL)","act":"Reinforcement Steel","bs":"2027-03-12","bf":"2027-03-13","s":"2027-03-17","f":"2027-03-18","as_":"2027-03-17","af":"2027-03-18","pct":100.0,"bc":50090.25},{"g":"S","fl":5,"el":"Stair structure (4nd FL - 5nd FL)","act":"Formwork","bs":"2027-03-10","bf":"2027-03-11","s":"2027-03-15","f":"2027-03-16","as_":"2027-03-15","af":"2027-03-16","pct":100.0,"bc":35778.75},{"g":"S","fl":5,"el":"Stair structure (4nd FL - 5nd FL)","act":"Concrete","bs":"2027-03-15","bf":"2027-03-15","s":"2027-03-20","f":"2027-03-20","as_":"2027-03-20","af":"2027-03-20","pct":100.0,"bc":52952.55},{"g":"S","fl":5,"el":"Stair structure (4nd FL - 5nd FL)","act":"Curing & Stripping","bs":"2027-03-16","bf":"2027-03-17","s":"2027-03-22","f":"2027-03-23","as_":"2027-03-22","af":"2027-03-23","pct":100.0,"bc":4293.45},{"g":"S","fl":6,"el":"RC Beam","act":"Reinforcement Steel","bs":"2027-03-16","bf":"2027-03-18","s":"2027-03-22","f":"2027-03-25","as_":"2027-03-22","af":"2027-03-25","pct":100.0,"bc":84745.61},{"g":"S","fl":6,"el":"RC Beam","act":"Formwork","bs":"2027-03-13","bf":"2027-03-16","s":"2027-03-20","f":"2027-03-24","as_":"2027-03-20","af":"2027-03-24","pct":100.0,"bc":50443.82},{"g":"S","fl":6,"el":"RC Beam","act":"Concrete","bs":"2027-03-23","bf":"2027-03-23","s":"2027-03-29","f":"2027-03-29","as_":"2027-03-29","af":"2027-03-29","pct":100.0,"bc":60532.58},{"g":"S","fl":6,"el":"RC Beam","act":"Curing & Stripping","bs":"2027-03-24","bf":"2027-03-25","s":"2027-03-30","f":"2027-03-31","as_":"2027-03-30","af":"2027-03-31","pct":100.0,"bc":6053.26},{"g":"S","fl":6,"el":"RC Slab","act":"Reinforcement Steel","bs":"2027-03-16","bf":"2027-03-18","s":"2027-03-22","f":"2027-03-25","as_":"2027-03-22","af":"2027-03-25","pct":100.0,"bc":55392.41},{"g":"S","fl":6,"el":"RC Slab","act":"Formwork","bs":"2027-03-13","bf":"2027-03-15","s":"2027-03-20","f":"2027-03-22","as_":"2027-03-20","af":"2027-03-22","pct":100.0,"bc":32069.29},{"g":"S","fl":6,"el":"RC Slab","act":"Concrete","bs":"2027-03-23","bf":"2027-03-23","s":"2027-03-29","f":"2027-03-29","as_":"2027-03-29","af":"2027-03-29","pct":100.0,"bc":53934.72},{"g":"S","fl":6,"el":"RC Slab","act":"Curing & Stripping","bs":"2027-03-24","bf":"2027-03-27","s":"2027-03-30","f":"2027-04-03","as_":"2027-03-30","af":"2027-04-03","pct":100.0,"bc":4373.09},{"g":"S","fl":6,"el":"Post tension system","act":"Reinforcement Steel","bs":"2027-03-16","bf":"2027-03-17","s":"2027-03-22","f":"2027-03-23","as_":"2027-03-22","af":"2027-03-23","pct":100.0,"bc":92225.87},{"g":"S","fl":6,"el":"Post tension system","act":"Duct / Sheath Installation","bs":"2027-03-18","bf":"2027-03-19","s":"2027-03-24","f":"2027-03-25","as_":"2027-03-24","af":"2027-03-25","pct":100.0,"bc":42565.78},{"g":"S","fl":6,"el":"Post tension system","act":"Tendon/Strand Installation","bs":"2027-03-20","bf":"2027-03-22","s":"2027-03-27","f":"2027-03-29","as_":"2027-03-27","af":"2027-03-29","pct":100.0,"bc":92225.87},{"g":"S","fl":6,"el":"Post tension system","act":"Anchorage System","bs":"2027-03-22","bf":"2027-03-22","s":"2027-03-29","f":"2027-03-29","as_":"2027-03-29","af":"2027-03-29","pct":100.0,"bc":35471.49},{"g":"S","fl":6,"el":"Post tension system","act":"Formwork (Table Form)","bs":"2027-03-13","bf":"2027-03-15","s":"2027-03-20","f":"2027-03-22","as_":"2027-03-20","af":"2027-03-22","pct":100.0,"bc":35471.49},{"g":"S","fl":6,"el":"Post tension system","act":"Concrete Work","bs":"2027-03-23","bf":"2027-03-23","s":"2027-03-29","f":"2027-03-29","as_":"2027-03-29","af":"2027-03-29","pct":100.0,"bc":354714.87},{"g":"S","fl":6,"el":"Post tension system","act":"Stressing / Tensioning","bs":"2027-03-27","bf":"2027-03-29","s":"2027-04-03","f":"2027-04-05","as_":"2027-04-03","af":"2027-04-05","pct":100.0,"bc":28377.19},{"g":"S","fl":6,"el":"Post tension system","act":"Grouting / Corrosion Protection","bs":"2027-03-27","bf":"2027-03-29","s":"2027-04-03","f":"2027-04-05","as_":"2027-04-03","af":"2027-04-05","pct":100.0,"bc":21282.89},{"g":"S","fl":6,"el":"Post tension system","act":"QC & Testing","bs":"2027-03-29","bf":"2027-03-29","s":"2027-04-07","f":"2027-04-07","as_":"2027-04-07","af":"2027-04-07","pct":100.0,"bc":7094.3},{"g":"S","fl":6,"el":"Column","act":"Reinforcement Steel","bs":"2027-03-26","bf":"2027-03-29","s":"2027-04-01","f":"2027-04-05","as_":"2027-04-01","af":"2027-04-05","pct":100.0,"bc":198445.12},{"g":"S","fl":6,"el":"Column","act":"Formwork","bs":"2027-03-30","bf":"2027-03-31","s":"2027-04-08","f":"2027-04-09","as_":"2027-04-08","af":"2027-04-09","pct":100.0,"bc":12403.2},{"g":"S","fl":6,"el":"Column","act":"Concrete","bs":"2027-04-01","bf":"2027-04-01","s":"2027-04-12","f":"2027-04-12","as_":"2027-04-12","af":"2027-04-12","pct":100.0,"bc":158766.09},{"g":"S","fl":6,"el":"Column","act":"Curing & Stripping","bs":"2027-04-02","bf":"2027-04-05","s":"2027-04-12","f":"2027-04-19","as_":"2027-04-12","af":"2027-04-19","pct":100.0,"bc":1788.38},{"g":"S","fl":6,"el":"Lift core - Shear wall (6nd FL)","act":"Reinforcement Steel","bs":"2027-03-26","bf":"2027-03-29","s":"2027-04-01","f":"2027-04-05","as_":"2027-04-01","af":"2027-04-05","pct":100.0,"bc":33510.0},{"g":"S","fl":6,"el":"Lift core - Shear wall (6nd FL)","act":"Formwork (Slip Form)","bs":"2027-03-30","bf":"2027-04-01","s":"2027-04-08","f":"2027-04-12","as_":"2027-04-08","af":"2027-04-12","pct":100.0,"bc":30637.72},{"g":"S","fl":6,"el":"Lift core - Shear wall (6nd FL)","act":"Concrete","bs":"2027-04-02","bf":"2027-04-02","s":"2027-04-16","f":"2027-04-16","as_":"2027-04-16","af":"2027-04-16","pct":100.0,"bc":28722.86},{"g":"S","fl":6,"el":"Lift core - Shear wall (6nd FL)","act":"Curing & Stripping","bs":"2027-04-03","bf":"2027-04-05","s":"2027-04-16","f":"2027-04-17","as_":"2027-04-16","af":"2027-04-17","pct":100.0,"bc":2872.29},{"g":"S","fl":6,"el":"Stair structure (5nd FL - 6nd FL)","act":"Reinforcement Steel","bs":"2027-04-05","bf":"2027-04-06","s":"2027-04-16","f":"2027-04-17","as_":"2027-04-16","af":"2027-04-17","pct":100.0,"bc":50090.25},{"g":"S","fl":6,"el":"Stair structure (5nd FL - 6nd FL)","act":"Formwork","bs":"2027-04-02","bf":"2027-04-03","s":"2027-04-12","f":"2027-04-16","as_":"2027-04-12","af":"2027-04-16","pct":100.0,"bc":35778.75},{"g":"S","fl":6,"el":"Stair structure (5nd FL - 6nd FL)","act":"Concrete","bs":"2027-04-07","bf":"2027-04-07","s":"2027-04-17","f":"2027-04-17","as_":"2027-04-17","af":"2027-04-17","pct":100.0,"bc":52952.55},{"g":"S","fl":6,"el":"Stair structure (5nd FL - 6nd FL)","act":"Curing & Stripping","bs":"2027-04-08","bf":"2027-04-09","s":"2027-04-19","f":"2027-04-20","as_":"2027-04-19","af":"2027-04-20","pct":100.0,"bc":4293.45},{"g":"S","fl":"RD","el":"RC Roof Beam","act":"Reinforcement Steel","bs":"2027-04-09","bf":"2027-04-12","s":"2027-04-23","f":"2027-04-26","as_":null,"af":null,"pct":0.0,"bc":75077.19},{"g":"S","fl":"RD","el":"RC Roof Beam","act":"Formwork","bs":"2027-04-06","bf":"2027-04-08","s":"2027-04-20","f":"2027-04-22","as_":null,"af":null,"pct":0.0,"bc":10465.92},{"g":"S","fl":"RD","el":"RC Roof Beam","act":"Concrete","bs":"2027-04-19","bf":"2027-04-19","s":"2027-04-29","f":"2027-04-29","as_":null,"af":null,"pct":0.0,"bc":34652.8},{"g":"S","fl":"RD","el":"RC Roof Beam","act":"Curing & Stripping","bs":"2027-04-20","bf":"2027-04-21","s":"2027-04-30","f":"2027-05-03","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"S","fl":"RD","el":"RC Slab","act":"Reinforcement Steel","bs":"2027-04-12","bf":"2027-04-17","s":"2027-04-26","f":"2027-04-28","as_":null,"af":null,"pct":0.0,"bc":65692.54},{"g":"S","fl":"RD","el":"RC Slab","act":"Formwork","bs":"2027-04-08","bf":"2027-04-09","s":"2027-04-22","f":"2027-04-23","as_":null,"af":null,"pct":0.0,"bc":9157.88},{"g":"S","fl":"RD","el":"RC Slab","act":"Concrete","bs":"2027-04-19","bf":"2027-04-19","s":"2027-04-29","f":"2027-04-29","as_":null,"af":null,"pct":0.0,"bc":30321.2},{"g":"S","fl":"RD","el":"RC Slab","act":"Curing & Stripping","bs":"2027-04-20","bf":"2027-04-22","s":"2027-04-30","f":"2027-05-04","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"S","fl":"RD","el":"RC Gutter","act":"Reinforcement Steel","bs":"2027-04-12","bf":"2027-04-16","s":"2027-04-26","f":"2027-04-27","as_":null,"af":null,"pct":0.0,"bc":28153.94},{"g":"S","fl":"RD","el":"RC Gutter","act":"Formwork","bs":"2027-04-08","bf":"2027-04-09","s":"2027-04-22","f":"2027-04-23","as_":null,"af":null,"pct":0.0,"bc":3924.72},{"g":"S","fl":"RD","el":"RC Gutter","act":"Concrete","bs":"2027-04-19","bf":"2027-04-19","s":"2027-04-29","f":"2027-04-29","as_":null,"af":null,"pct":0.0,"bc":12994.8},{"g":"S","fl":"RD","el":"RC Gutter","act":"Curing & Stripping","bs":"2027-04-20","bf":"2027-04-21","s":"2027-04-30","f":"2027-05-03","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"S","fl":"RD","el":"Lift Slab","act":"Reinforcement Steel","bs":"2027-04-12","bf":"2027-04-16","s":"2027-04-26","f":"2027-04-27","as_":null,"af":null,"pct":0.0,"bc":18769.3},{"g":"S","fl":"RD","el":"Lift Slab","act":"Formwork","bs":"2027-04-08","bf":"2027-04-09","s":"2027-04-22","f":"2027-04-23","as_":null,"af":null,"pct":0.0,"bc":2616.48},{"g":"S","fl":"RD","el":"Lift Slab","act":"Concrete","bs":"2027-04-19","bf":"2027-04-19","s":"2027-04-29","f":"2027-04-29","as_":null,"af":null,"pct":0.0,"bc":8663.2},{"g":"S","fl":"RD","el":"Lift Slab","act":"Curing & Stripping","bs":"2027-04-20","bf":"2027-04-21","s":"2027-04-30","f":"2027-05-03","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"S","fl":"RW","el":"Steel work","act":"Fabrication","bs":"2027-04-23","bf":"2027-05-03","s":"2027-05-05","f":"2027-05-13","as_":null,"af":null,"pct":0.0,"bc":180568.67},{"g":"S","fl":"RW","el":"Steel work","act":"Surface Protection","bs":"2027-04-29","bf":"2027-05-04","s":"2027-05-11","f":"2027-05-14","as_":null,"af":null,"pct":0.0,"bc":107455.18},{"g":"S","fl":"RW","el":"Steel work","act":"Erection","bs":"2027-05-05","bf":"2027-05-11","s":"2027-05-15","f":"2027-05-21","as_":null,"af":null,"pct":0.0,"bc":206005.65},{"g":"S","fl":"RW","el":"Steel work","act":"QC & Testing","bs":"2027-05-12","bf":"2027-05-13","s":"2027-05-22","f":"2027-05-24","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"S","fl":"RW","el":"Roof Covering","act":"Roof Erection","bs":"2027-05-14","bf":"2027-05-19","s":"2027-05-25","f":"2027-05-29","as_":null,"af":null,"pct":0.0,"bc":342998.8},{"g":"S","fl":"RW","el":"Roof Covering","act":"QC & Testing","bs":"2027-05-20","bf":"2027-05-21","s":"2027-05-31","f":"2027-06-01","as_":null,"af":null,"pct":0.0,"bc":0},{"g":"A","fl":1,"el":"Wall Work","act":"Autoclaved Aerated Concrete","bs":"2027-02-23","bf":"2027-03-06","s":"2027-02-27","f":"2027-03-15","as_":"2027-02-27","af":null,"pct":64.0,"bc":221205.18},{"g":"A","fl":1,"el":"Wall Work","act":"Plastering","bs":"2027-03-02","bf":"2027-03-13","s":"2027-03-09","f":"2027-03-24","as_":"2027-03-09","af":null,"pct":64.0,"bc":147470.12},{"g":"A","fl":1,"el":"Wall Work","act":"Ceramic Wall Tile","bs":"2027-03-08","bf":"2027-03-20","s":"2027-03-18","f":"2027-04-05","as_":"2027-03-18","af":null,"pct":63.0,"bc":122891.77},{"g":"A","fl":1,"el":"Floor Finishing","act":"Ceramic Floor Tile","bs":"2027-03-06","bf":"2027-03-15","s":"2027-03-17","f":"2027-03-27","as_":"2027-03-17","af":null,"pct":70.0,"bc":178492.2},{"g":"A","fl":1,"el":"Floor Finishing","act":"Trowel Finish","bs":"2027-03-12","bf":"2027-03-13","s":"2027-03-23","f":"2027-03-24","as_":"2027-03-23","af":"2027-03-24","pct":100.0,"bc":11155.77},{"g":"A","fl":1,"el":"Ceiling Work","act":"Ceiling Frame","bs":"2027-03-10","bf":"2027-03-18","s":"2027-03-23","f":"2027-04-02","as_":"2027-03-23","af":null,"pct":70.0,"bc":38521.02},{"g":"A","fl":1,"el":"Ceiling Work","act":"Gypsum board","bs":"2027-03-16","bf":"2027-03-24","s":"2027-03-29","f":"2027-04-08","as_":"2027-03-29","af":null,"pct":70.0,"bc":47081.24},{"g":"A","fl":1,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-03-12","bf":"2027-03-16","s":"2027-03-23","f":"2027-03-27","as_":"2027-03-23","af":null,"pct":80.0,"bc":103863.28},{"g":"A","fl":1,"el":"Door & Window","act":"Door / Window Leaf","bs":"2027-03-31","bf":"2027-04-03","s":"2027-04-19","f":"2027-04-23","as_":"2027-04-19","af":null,"pct":80.0,"bc":135022.26},{"g":"A","fl":1,"el":"Door & Window","act":"Hardware - Hinge, Lock, Handle","bs":"2027-04-05","bf":"2027-04-05","s":"2027-04-26","f":"2027-04-26","as_":"2027-04-26","af":"2027-04-26","pct":100.0,"bc":20772.6},{"g":"A","fl":1,"el":"Painting Work","act":"Primer","bs":"2027-03-22","bf":"2027-03-26","s":"2027-04-10","f":"2027-04-20","as_":"2027-04-10","af":null,"pct":67.0,"bc":77437.76},{"g":"A","fl":1,"el":"Painting Work","act":"Finish Coat","bs":"2027-03-25","bf":"2027-03-30","s":"2027-04-16","f":"2027-04-22","as_":"2027-04-16","af":null,"pct":67.0,"bc":116156.64},{"g":"A","fl":1,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-03-06","bf":"2027-03-11","s":"2027-03-17","f":"2027-03-23","as_":"2027-03-17","af":null,"pct":67.0,"bc":2815.1},{"g":"A","fl":1,"el":"Waterproofing","act":"Terrace Waterproofing","bs":"2027-03-06","bf":"2027-03-11","s":"2027-03-17","f":"2027-03-23","as_":"2027-03-17","af":null,"pct":67.0,"bc":2502.31},{"g":"A","fl":1,"el":"Waterproofing","act":"Water Ponding Test","bs":"2027-03-09","bf":"2027-03-11","s":"2027-03-20","f":"2027-03-24","as_":"2027-03-20","af":null,"pct":75.0,"bc":938.37},{"g":"A","fl":1,"el":"Sanitary/Toilet Finishing","act":"Sanitary Ware","bs":"2027-03-24","bf":"2027-03-29","s":"2027-04-10","f":"2027-04-20","as_":"2027-04-10","af":null,"pct":67.0,"bc":10404.13},{"g":"A","fl":1,"el":"Sanitary/Toilet Finishing","act":"Accessories","bs":"2027-03-30","bf":"2027-03-30","s":"2027-04-17","f":"2027-04-17","as_":"2027-04-17","af":"2027-04-17","pct":100.0,"bc":21179.16},{"g":"A","fl":1,"el":"Stair Finishing","act":"Tread / Riser Finishing","bs":"2027-03-22","bf":"2027-03-24","s":"2027-04-10","f":"2027-04-17","as_":"2027-04-10","af":null,"pct":75.0,"bc":22311.53},{"g":"A","fl":1,"el":"Stair Finishing","act":"Handrail / Balustrade","bs":"2027-03-25","bf":"2027-03-27","s":"2027-04-16","f":"2027-04-20","as_":"2027-04-16","af":null,"pct":75.0,"bc":11155.77},{"g":"A","fl":2,"el":"Wall Work","act":"Autoclaved Aerated Concrete","bs":"2027-03-18","bf":"2027-03-30","s":"2027-03-29","f":"2027-04-16","as_":"2027-03-29","af":null,"pct":64.0,"bc":221205.18},{"g":"A","fl":2,"el":"Wall Work","act":"Plastering","bs":"2027-03-25","bf":"2027-04-06","s":"2027-04-08","f":"2027-04-27","as_":"2027-04-08","af":null,"pct":64.0,"bc":147470.12},{"g":"A","fl":2,"el":"Wall Work","act":"Ceramic Wall Tile","bs":"2027-03-31","bf":"2027-04-16","s":"2027-04-16","f":"2027-05-05","as_":"2027-04-16","af":null,"pct":63.0,"bc":122891.77},{"g":"A","fl":2,"el":"Floor Finishing","act":"Ceramic Floor Tile","bs":"2027-03-30","bf":"2027-04-07","s":"2027-04-17","f":"2027-04-28","as_":"2027-04-17","af":null,"pct":70.0,"bc":178492.2},{"g":"A","fl":2,"el":"Floor Finishing","act":"Trowel Finish","bs":"2027-04-05","bf":"2027-04-06","s":"2027-04-24","f":"2027-04-26","as_":"2027-04-24","af":"2027-04-26","pct":100.0,"bc":11155.77},{"g":"A","fl":2,"el":"Ceiling Work","act":"Ceiling Frame","bs":"2027-04-02","bf":"2027-04-10","s":"2027-04-24","f":"2027-05-06","as_":"2027-04-24","af":null,"pct":70.0,"bc":38521.02},{"g":"A","fl":2,"el":"Ceiling Work","act":"Gypsum board","bs":"2027-04-08","bf":"2027-04-20","s":"2027-04-29","f":"2027-05-11","as_":"2027-04-29","af":null,"pct":70.0,"bc":47081.24},{"g":"A","fl":2,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-04-05","bf":"2027-04-08","s":"2027-04-24","f":"2027-04-29","as_":"2027-04-24","af":null,"pct":80.0,"bc":103863.28},{"g":"A","fl":2,"el":"Door & Window","act":"Door / Window Leaf","bs":"2027-04-27","bf":"2027-04-30","s":"2027-05-17","f":"2027-05-21","as_":"2027-05-17","af":null,"pct":80.0,"bc":135022.26},{"g":"A","fl":2,"el":"Door & Window","act":"Hardware - Hinge, Lock, Handle","bs":"2027-05-03","bf":"2027-05-03","s":"2027-05-24","f":"2027-05-24","as_":"2027-05-24","af":"2027-05-24","pct":100.0,"bc":20772.6},{"g":"A","fl":2,"el":"Painting Work","act":"Primer","bs":"2027-04-17","bf":"2027-04-22","s":"2027-05-08","f":"2027-05-14","as_":"2027-05-08","af":null,"pct":67.0,"bc":77437.76},{"g":"A","fl":2,"el":"Painting Work","act":"Finish Coat","bs":"2027-04-21","bf":"2027-04-26","s":"2027-05-11","f":"2027-05-17","as_":"2027-05-11","af":null,"pct":67.0,"bc":116156.64},{"g":"A","fl":2,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-03-30","bf":"2027-04-03","s":"2027-04-17","f":"2027-04-23","as_":"2027-04-17","af":null,"pct":67.0,"bc":2815.1},{"g":"A","fl":2,"el":"Waterproofing","act":"Terrace Waterproofing","bs":"2027-03-30","bf":"2027-04-03","s":"2027-04-17","f":"2027-04-23","as_":"2027-04-17","af":null,"pct":67.0,"bc":2502.31},{"g":"A","fl":2,"el":"Waterproofing","act":"Water Ponding Test","bs":"2027-04-01","bf":"2027-04-03","s":"2027-04-19","f":"2027-04-22","as_":"2027-04-19","af":null,"pct":75.0,"bc":938.37},{"g":"A","fl":2,"el":"Sanitary/Toilet Finishing","act":"Sanitary Ware","bs":"2027-04-20","bf":"2027-04-24","s":"2027-05-08","f":"2027-05-14","as_":"2027-05-08","af":null,"pct":67.0,"bc":10404.13},{"g":"A","fl":2,"el":"Sanitary/Toilet Finishing","act":"Accessories","bs":"2027-04-26","bf":"2027-04-26","s":"2027-05-15","f":"2027-05-15","as_":"2027-05-15","af":"2027-05-15","pct":100.0,"bc":21179.16},{"g":"A","fl":2,"el":"Stair Finishing","act":"Tread / Riser Finishing","bs":"2027-04-17","bf":"2027-04-20","s":"2027-05-04","f":"2027-05-07","as_":"2027-05-04","af":null,"pct":75.0,"bc":22311.53},{"g":"A","fl":2,"el":"Stair Finishing","act":"Handrail / Balustrade","bs":"2027-04-21","bf":"2027-04-23","s":"2027-05-10","f":"2027-05-13","as_":"2027-05-10","af":null,"pct":75.0,"bc":11155.77},{"g":"A","fl":3,"el":"Wall Work","act":"Autoclaved Aerated Concrete","bs":"2027-04-10","bf":"2027-04-26","s":"2027-04-29","f":"2027-05-15","as_":"2027-04-29","af":null,"pct":64.0,"bc":221205.18},{"g":"A","fl":3,"el":"Wall Work","act":"Plastering","bs":"2027-04-21","bf":"2027-05-04","s":"2027-05-06","f":"2027-05-21","as_":"2027-05-06","af":null,"pct":64.0,"bc":147470.12},{"g":"A","fl":3,"el":"Wall Work","act":"Ceramic Wall Tile","bs":"2027-04-27","bf":"2027-05-11","s":"2027-05-12","f":"2027-05-29","as_":"2027-05-12","af":null,"pct":63.0,"bc":122891.77},{"g":"A","fl":3,"el":"Floor Finishing","act":"Ceramic Floor Tile","bs":"2027-04-26","bf":"2027-05-05","s":"2027-05-15","f":"2027-05-26","as_":"2027-05-15","af":null,"pct":70.0,"bc":178492.2},{"g":"A","fl":3,"el":"Floor Finishing","act":"Trowel Finish","bs":"2027-05-03","bf":"2027-05-04","s":"2027-05-20","f":"2027-05-21","as_":"2027-05-20","af":"2027-05-21","pct":100.0,"bc":11155.77},{"g":"A","fl":3,"el":"Ceiling Work","act":"Ceiling Frame","bs":"2027-04-29","bf":"2027-05-08","s":"2027-05-21","f":"2027-06-01","as_":null,"af":null,"pct":0.0,"bc":38521.02},{"g":"A","fl":3,"el":"Ceiling Work","act":"Gypsum board","bs":"2027-05-06","bf":"2027-05-14","s":"2027-05-27","f":"2027-06-07","as_":null,"af":null,"pct":0.0,"bc":47081.24},{"g":"A","fl":3,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-05-03","bf":"2027-05-06","s":"2027-05-20","f":"2027-05-25","as_":null,"af":null,"pct":0.0,"bc":103863.28},{"g":"A","fl":3,"el":"Door & Window","act":"Door / Window Leaf","bs":"2027-05-21","bf":"2027-05-25","s":"2027-06-15","f":"2027-06-19","as_":null,"af":null,"pct":0.0,"bc":135022.26},{"g":"A","fl":3,"el":"Door & Window","act":"Hardware - Hinge, Lock, Handle","bs":"2027-05-26","bf":"2027-05-26","s":"2027-06-21","f":"2027-06-21","as_":null,"af":null,"pct":0.0,"bc":20772.6},{"g":"A","fl":3,"el":"Painting Work","act":"Primer","bs":"2027-05-12","bf":"2027-05-17","s":"2027-06-04","f":"2027-06-10","as_":null,"af":null,"pct":0.0,"bc":77437.76},{"g":"A","fl":3,"el":"Painting Work","act":"Finish Coat","bs":"2027-05-15","bf":"2027-05-20","s":"2027-06-08","f":"2027-06-14","as_":null,"af":null,"pct":0.0,"bc":116156.64},{"g":"A","fl":3,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-04-26","bf":"2027-04-30","s":"2027-05-14","f":"2027-05-20","as_":null,"af":null,"pct":0.0,"bc":2815.1},{"g":"A","fl":3,"el":"Waterproofing","act":"Terrace Waterproofing","bs":"2027-04-26","bf":"2027-04-30","s":"2027-05-14","f":"2027-05-20","as_":null,"af":null,"pct":0.0,"bc":2502.31},{"g":"A","fl":3,"el":"Waterproofing","act":"Water Ponding Test","bs":"2027-04-28","bf":"2027-04-30","s":"2027-05-17","f":"2027-05-19","as_":null,"af":null,"pct":0.0,"bc":938.37},{"g":"A","fl":3,"el":"Sanitary/Toilet Finishing","act":"Sanitary Ware","bs":"2027-05-14","bf":"2027-05-19","s":"2027-06-04","f":"2027-06-09","as_":null,"af":null,"pct":0.0,"bc":10404.13},{"g":"A","fl":3,"el":"Sanitary/Toilet Finishing","act":"Accessories","bs":"2027-05-20","bf":"2027-05-20","s":"2027-06-10","f":"2027-06-10","as_":null,"af":null,"pct":0.0,"bc":21179.16},{"g":"A","fl":3,"el":"Stair Finishing","act":"Tread / Riser Finishing","bs":"2027-05-06","bf":"2027-05-08","s":"2027-05-27","f":"2027-05-29","as_":null,"af":null,"pct":0.0,"bc":22311.53},{"g":"A","fl":3,"el":"Stair Finishing","act":"Handrail / Balustrade","bs":"2027-05-10","bf":"2027-05-12","s":"2027-05-31","f":"2027-06-02","as_":null,"af":null,"pct":0.0,"bc":11155.77},{"g":"A","fl":4,"el":"Wall Work","act":"Autoclaved Aerated Concrete","bs":"2027-05-08","bf":"2027-05-20","s":"2027-05-26","f":"2027-06-07","as_":null,"af":null,"pct":0.0,"bc":221205.18},{"g":"A","fl":4,"el":"Wall Work","act":"Plastering","bs":"2027-05-15","bf":"2027-05-27","s":"2027-06-02","f":"2027-06-14","as_":null,"af":null,"pct":0.0,"bc":147470.12},{"g":"A","fl":4,"el":"Wall Work","act":"Ceramic Wall Tile","bs":"2027-05-21","bf":"2027-06-03","s":"2027-06-08","f":"2027-06-21","as_":null,"af":null,"pct":0.0,"bc":122891.77},{"g":"A","fl":4,"el":"Floor Finishing","act":"Ceramic Floor Tile","bs":"2027-05-20","bf":"2027-05-28","s":"2027-06-07","f":"2027-06-15","as_":null,"af":null,"pct":0.0,"bc":178492.2},{"g":"A","fl":4,"el":"Floor Finishing","act":"Trowel Finish","bs":"2027-05-26","bf":"2027-05-27","s":"2027-06-12","f":"2027-06-14","as_":null,"af":null,"pct":0.0,"bc":11155.77},{"g":"A","fl":4,"el":"Ceiling Work","act":"Ceiling Frame","bs":"2027-05-24","bf":"2027-06-01","s":"2027-06-10","f":"2027-06-18","as_":null,"af":null,"pct":0.0,"bc":38521.02},{"g":"A","fl":4,"el":"Ceiling Work","act":"Gypsum board","bs":"2027-05-29","bf":"2027-06-07","s":"2027-06-16","f":"2027-06-24","as_":null,"af":null,"pct":0.0,"bc":47081.24},{"g":"A","fl":4,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-05-26","bf":"2027-05-29","s":"2027-06-12","f":"2027-06-16","as_":null,"af":null,"pct":0.0,"bc":103863.28},{"g":"A","fl":4,"el":"Door & Window","act":"Door / Window Leaf","bs":"2027-06-14","bf":"2027-06-17","s":"2027-07-01","f":"2027-07-05","as_":null,"af":null,"pct":0.0,"bc":135022.26},{"g":"A","fl":4,"el":"Door & Window","act":"Hardware - Hinge, Lock, Handle","bs":"2027-06-18","bf":"2027-06-18","s":"2027-07-06","f":"2027-07-06","as_":null,"af":null,"pct":0.0,"bc":20772.6},{"g":"A","fl":4,"el":"Painting Work","act":"Primer","bs":"2027-06-04","bf":"2027-06-09","s":"2027-06-22","f":"2027-06-26","as_":null,"af":null,"pct":0.0,"bc":77437.76},{"g":"A","fl":4,"el":"Painting Work","act":"Finish Coat","bs":"2027-06-08","bf":"2027-06-12","s":"2027-06-25","f":"2027-06-30","as_":null,"af":null,"pct":0.0,"bc":116156.64},{"g":"A","fl":4,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-05-20","bf":"2027-05-25","s":"2027-06-07","f":"2027-06-11","as_":null,"af":null,"pct":0.0,"bc":2815.1},{"g":"A","fl":4,"el":"Waterproofing","act":"Terrace Waterproofing","bs":"2027-05-20","bf":"2027-05-25","s":"2027-06-07","f":"2027-06-11","as_":null,"af":null,"pct":0.0,"bc":2502.31},{"g":"A","fl":4,"el":"Waterproofing","act":"Water Ponding Test","bs":"2027-05-22","bf":"2027-05-25","s":"2027-06-09","f":"2027-06-11","as_":null,"af":null,"pct":0.0,"bc":938.37},{"g":"A","fl":4,"el":"Sanitary / Toilet Finishing","act":"Sanitary Ware","bs":"2027-06-07","bf":"2027-06-11","s":"2027-06-24","f":"2027-06-29","as_":null,"af":null,"pct":0.0,"bc":10404.13},{"g":"A","fl":4,"el":"Sanitary / Toilet Finishing","act":"Accessories","bs":"2027-06-12","bf":"2027-06-12","s":"2027-06-30","f":"2027-06-30","as_":null,"af":null,"pct":0.0,"bc":21179.16},{"g":"A","fl":4,"el":"Stair Finishing","act":"Tread / Riser Finishing","bs":"2027-05-29","bf":"2027-06-01","s":"2027-06-16","f":"2027-06-18","as_":null,"af":null,"pct":0.0,"bc":22311.53},{"g":"A","fl":4,"el":"Stair Finishing","act":"Handrail / Balustrade","bs":"2027-06-02","bf":"2027-06-04","s":"2027-06-19","f":"2027-06-22","as_":null,"af":null,"pct":0.0,"bc":11155.77},{"g":"A","fl":5,"el":"Wall Work","act":"Autoclaved Aerated Concrete","bs":"2027-06-01","bf":"2027-06-12","s":"2027-06-18","f":"2027-06-30","as_":null,"af":null,"pct":0.0,"bc":221205.18},{"g":"A","fl":5,"el":"Wall Work","act":"Plastering","bs":"2027-06-08","bf":"2027-06-19","s":"2027-06-25","f":"2027-07-07","as_":null,"af":null,"pct":0.0,"bc":147470.12},{"g":"A","fl":5,"el":"Wall Work","act":"Ceramic Wall Tile","bs":"2027-06-14","bf":"2027-06-26","s":"2027-07-01","f":"2027-07-14","as_":null,"af":null,"pct":0.0,"bc":122891.77},{"g":"A","fl":5,"el":"Floor Finishing","act":"Ceramic Floor Tile","bs":"2027-06-12","bf":"2027-06-21","s":"2027-06-30","f":"2027-07-08","as_":null,"af":null,"pct":0.0,"bc":178492.2},{"g":"A","fl":5,"el":"Floor Finishing","act":"Trowel Finish","bs":"2027-06-18","bf":"2027-06-19","s":"2027-07-06","f":"2027-07-07","as_":null,"af":null,"pct":0.0,"bc":11155.77},{"g":"A","fl":5,"el":"Ceiling Work","act":"Ceiling Frame","bs":"2027-06-16","bf":"2027-06-24","s":"2027-07-03","f":"2027-07-12","as_":null,"af":null,"pct":0.0,"bc":38521.02},{"g":"A","fl":5,"el":"Ceiling Work","act":"Gypsum board","bs":"2027-06-22","bf":"2027-06-30","s":"2027-07-09","f":"2027-07-17","as_":null,"af":null,"pct":0.0,"bc":47081.24},{"g":"A","fl":5,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-06-18","bf":"2027-06-22","s":"2027-07-06","f":"2027-07-09","as_":null,"af":null,"pct":0.0,"bc":103863.28},{"g":"A","fl":5,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-07-07","bf":"2027-07-10","s":"2027-07-24","f":"2027-07-28","as_":null,"af":null,"pct":0.0,"bc":135022.26},{"g":"A","fl":5,"el":"Door & Window","act":"Hardware - Hinge, Lock, Handle","bs":"2027-07-12","bf":"2027-07-12","s":"2027-07-29","f":"2027-07-29","as_":null,"af":null,"pct":0.0,"bc":20772.6},{"g":"A","fl":5,"el":"Painting Work","act":"Primer","bs":"2027-06-28","bf":"2027-07-02","s":"2027-07-15","f":"2027-07-20","as_":null,"af":null,"pct":0.0,"bc":77437.76},{"g":"A","fl":5,"el":"Painting Work","act":"Finish Coat","bs":"2027-07-01","bf":"2027-07-06","s":"2027-07-19","f":"2027-07-23","as_":null,"af":null,"pct":0.0,"bc":116156.64},{"g":"A","fl":5,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-06-12","bf":"2027-06-17","s":"2027-06-30","f":"2027-07-05","as_":null,"af":null,"pct":0.0,"bc":2815.1},{"g":"A","fl":5,"el":"Waterproofing","act":"Terrace Waterproofing","bs":"2027-06-12","bf":"2027-06-17","s":"2027-06-30","f":"2027-07-05","as_":null,"af":null,"pct":0.0,"bc":2502.31},{"g":"A","fl":5,"el":"Waterproofing","act":"Water Ponding Test","bs":"2027-06-15","bf":"2027-06-17","s":"2027-07-02","f":"2027-07-05","as_":null,"af":null,"pct":0.0,"bc":938.37},{"g":"A","fl":5,"el":"Sanitary/Toilet Finishing","act":"Sanitary Ware","bs":"2027-06-30","bf":"2027-07-05","s":"2027-07-17","f":"2027-07-22","as_":null,"af":null,"pct":0.0,"bc":10404.13},{"g":"A","fl":5,"el":"Sanitary/Toilet Finishing","act":"Accessories","bs":"2027-07-06","bf":"2027-07-06","s":"2027-07-23","f":"2027-07-23","as_":null,"af":null,"pct":0.0,"bc":21179.16},{"g":"A","fl":5,"el":"Stair Finishing","act":"Tread / Riser Finishing","bs":"2027-06-22","bf":"2027-06-24","s":"2027-07-09","f":"2027-07-12","as_":null,"af":null,"pct":0.0,"bc":22311.53},{"g":"A","fl":5,"el":"Stair Finishing","act":"Handrail / Balustrade","bs":"2027-06-25","bf":"2027-06-28","s":"2027-07-13","f":"2027-07-15","as_":null,"af":null,"pct":0.0,"bc":11155.77},{"g":"A","fl":6,"el":"Wall Work","act":"Autoclaved Aerated Concrete","bs":"2027-06-24","bf":"2027-07-06","s":"2027-07-12","f":"2027-07-23","as_":null,"af":null,"pct":0.0,"bc":221205.18},{"g":"A","fl":6,"el":"Wall Work","act":"Plastering","bs":"2027-07-01","bf":"2027-07-13","s":"2027-07-19","f":"2027-07-30","as_":null,"af":null,"pct":0.0,"bc":147470.12},{"g":"A","fl":6,"el":"Wall Work","act":"Ceramic Wall Tile","bs":"2027-07-07","bf":"2027-07-20","s":"2027-07-24","f":"2027-08-06","as_":null,"af":null,"pct":0.0,"bc":122891.77},{"g":"A","fl":6,"el":"Floor Finishing","act":"Ceramic Floor Tile","bs":"2027-07-06","bf":"2027-07-14","s":"2027-07-23","f":"2027-07-31","as_":null,"af":null,"pct":0.0,"bc":178492.2},{"g":"A","fl":6,"el":"Floor Finishing","act":"Trowel Finish","bs":"2027-07-12","bf":"2027-07-13","s":"2027-07-29","f":"2027-07-30","as_":null,"af":null,"pct":0.0,"bc":11155.77},{"g":"A","fl":6,"el":"Ceiling Work","act":"Ceiling Frame","bs":"2027-07-09","bf":"2027-07-17","s":"2027-07-27","f":"2027-08-04","as_":null,"af":null,"pct":0.0,"bc":38521.02},{"g":"A","fl":6,"el":"Ceiling Work","act":"Gypsum board","bs":"2027-07-15","bf":"2027-07-23","s":"2027-08-02","f":"2027-08-10","as_":null,"af":null,"pct":0.0,"bc":47081.24},{"g":"A","fl":6,"el":"Door & Window","act":"Door / Window Frame","bs":"2027-07-12","bf":"2027-07-15","s":"2027-07-29","f":"2027-08-02","as_":null,"af":null,"pct":0.0,"bc":103863.28},{"g":"A","fl":6,"el":"Door & Window","act":"Door / Window Leaf","bs":"2027-07-30","bf":"2027-08-03","s":"2027-08-17","f":"2027-08-20","as_":null,"af":null,"pct":0.0,"bc":135022.26},{"g":"A","fl":6,"el":"Door & Window","act":"Hardware - Hinge, Lock, Handle","bs":"2027-08-04","bf":"2027-08-04","s":"2027-08-21","f":"2027-08-21","as_":null,"af":null,"pct":0.0,"bc":20772.6},{"g":"A","fl":6,"el":"Painting Work","act":"Primer","bs":"2027-07-21","bf":"2027-07-26","s":"2027-08-07","f":"2027-08-12","as_":null,"af":null,"pct":0.0,"bc":77437.76},{"g":"A","fl":6,"el":"Painting Work","act":"Finish Coat","bs":"2027-07-24","bf":"2027-07-29","s":"2027-08-11","f":"2027-08-16","as_":null,"af":null,"pct":0.0,"bc":116156.64},{"g":"A","fl":6,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-07-06","bf":"2027-07-10","s":"2027-07-23","f":"2027-07-28","as_":null,"af":null,"pct":0.0,"bc":2815.1},{"g":"A","fl":6,"el":"Waterproofing","act":"Toilet Waterproofing","bs":"2027-07-06","bf":"2027-07-10","s":"2027-07-23","f":"2027-07-28","as_":null,"af":null,"pct":0.0,"bc":2502.31},{"g":"A","fl":6,"el":"Waterproofing","act":"Water Ponding Test","bs":"2027-07-08","bf":"2027-07-10","s":"2027-07-26","f":"2027-07-28","as_":null,"af":null,"pct":0.0,"bc":938.37},{"g":"A","fl":6,"el":"Sanitary / Toilet Finishing","act":"Sanitary Ware","bs":"2027-07-23","bf":"2027-07-28","s":"2027-08-10","f":"2027-08-14","as_":null,"af":null,"pct":0.0,"bc":10404.13},{"g":"A","fl":6,"el":"Sanitary / Toilet Finishing","act":"Accessories","bs":"2027-07-29","bf":"2027-07-29","s":"2027-08-16","f":"2027-08-16","as_":null,"af":null,"pct":0.0,"bc":21179.16},{"g":"A","fl":6,"el":"Stair Finishing","act":"Tread / Riser Finishing","bs":"2027-07-15","bf":"2027-07-17","s":"2027-08-02","f":"2027-08-04","as_":null,"af":null,"pct":0.0,"bc":22311.53},{"g":"A","fl":6,"el":"Stair Finishing","act":"Handrail / Balustrade","bs":"2027-07-19","bf":"2027-07-21","s":"2027-08-05","f":"2027-08-07","as_":null,"af":null,"pct":0.0,"bc":11155.77}]};
+
+function makeLux(renderer, DUSK, W, H){
+  const scene = new THREE.Scene(); const P = new URLSearchParams('');
+  let seed = 11; const rnd = () => (seed = (seed*16807)%2147483647, (seed-1)/2147483646);
+
+// ---------- procedural sky (gradient + sun glow + streaky clouds) ----------
+const SUN = DUSK ? new THREE.Vector3(-0.55,-0.06,-0.83).normalize() : new THREE.Vector3(0.62,0.16,-0.77).normalize();
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite:false, fog:false,
+  uniforms:{ sunDir:{value:SUN}, night:{value:DUSK?1:0} },
+  vertexShader:`varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); gl_Position.z = gl_Position.w; }`,
+  fragmentShader:`varying vec3 vD; uniform vec3 sunDir; uniform float night;
+  float h21(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float n2(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+    return mix(mix(h21(i),h21(i+vec2(1,0)),f.x), mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),f.x), f.y); }
+  float fbm(vec2 p){ float s=0., a=.5; for(int i=0;i<6;i++){ s+=a*n2(p); p*=2.03; a*=.5; } return s; }
+  void main(){
+    vec3 d = normalize(vD); float h = d.y;
+    vec3 zen = mix(vec3(.08,.24,.60), vec3(.03,.06,.17), night);
+    vec3 mid = mix(vec3(.36,.56,.86), vec3(.12,.20,.42), night);
+    vec3 hor = mix(vec3(1.0,.74,.48), vec3(.85,.50,.36), night);
+    float hp = max(h,0.);
+    vec3 c = mix(hor, mid, smoothstep(0.,.22,hp));
+    c = mix(c, zen, smoothstep(.18,.85,hp));
+    float sd = max(dot(d,sunDir),0.);
+    c += mix(vec3(1.,.55,.25),vec3(.9,.35,.2),night) * (pow(sd,2.5)*.45 + pow(sd,12.)*.5 + pow(sd,60.)*.6) * (1.-smoothstep(0.,.5,hp)*.6);
+    c += vec3(1.,.85,.6)*pow(sd,900.)*6.*(1.-night);
+    if (h>0.){
+      vec2 uv = d.xz/(h+.08);
+      float cl = fbm(uv*vec2(.55,1.6)+vec2(3.,7.));
+      cl = smoothstep(.52,.80,cl) * smoothstep(.0,.12,h) * (1.-smoothstep(.55,.9,h));
+      vec3 cc = mix(vec3(1.,.78,.62), vec3(.55,.42,.55), night);
+      cc = mix(cc*0.85, vec3(1.,.66,.42)*(1.-night*.3), pow(sd,3.)*.8);
+      c = mix(c, cc, cl*.75);
+    } else {
+      c = mix(hor*.75, vec3(.25,.27,.25), smoothstep(0.,-.2,h));
+    }
+    gl_FragColor = vec4(c,1.);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }`
+});
+const sky = new THREE.Mesh(new THREE.SphereGeometry(1500,48,32), skyMat);
+scene.add(sky);
+// environment from the same sky so glass reflects it
+{ const pm = new THREE.PMREMGenerator(renderer); const es = new THREE.Scene();
+  es.add(new THREE.Mesh(new THREE.SphereGeometry(100,48,32), skyMat));
+  scene.environment = pm.fromScene(es, 0, 0.1, 2000).texture; }
+scene.environmentIntensity = DUSK ? 0.6 : 0.9;
+scene.fog = new THREE.FogExp2(DUSK?0x2b3150:0xd8c4ad, (P.get('cam')==='aerial'||P.get('orbit'))?0.0018:(DUSK?0.0035:0.0042));
+
+// ---------- lights ----------
+const hemi = new THREE.HemisphereLight(DUSK?0x5a6ea8:0xbfd2ee, DUSK?0x1c1814:0x5a4a38, DUSK?0.7:0.75); scene.add(hemi);
+const sun = new THREE.DirectionalLight(DUSK?0x8090c0:0xffb070, DUSK?0.25:4.2);
+sun.position.copy(SUN).multiplyScalar(150).add(new THREE.Vector3(8,0,16)); if(DUSK) sun.position.y = 60;
+sun.castShadow = true; sun.shadow.mapSize.set(4096,4096);
+Object.assign(sun.shadow.camera,{left:-60,right:60,top:60,bottom:-60,near:1,far:500});
+sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.03;
+sun.target.position.set(8,0,16); scene.add(sun, sun.target);
+
+// ---------- canvas textures ----------
+function canvasTex(w,h,draw,rep=[1,1],srgb=true){ const c=document.createElement('canvas'); c.width=w; c.height=h; draw(c.getContext('2d'),w,h);
+  const t=new THREE.CanvasTexture(c); if(srgb) t.colorSpace=THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(...rep); t.anisotropy=8; return t; }
+const pavingTex = canvasTex(1024,1024,(g,w,h)=>{ g.fillStyle='#c9bfae'; g.fillRect(0,0,w,h);
+  const n=8, s=w/n; for(let i=0;i<n;i++)for(let j=0;j<n*2;j++){ const v=200+rnd()*22|0; g.fillStyle=`rgb(${v},${v-8},${v-22})`; g.fillRect(i*s+2,j*s/2+2,s-4,s/2-4); }
+  for(let k=0;k<4000;k++){ g.fillStyle=`rgba(90,80,60,${rnd()*0.08})`; g.fillRect(rnd()*w,rnd()*h,2,2);} },[12,12]);
+const lawnTex = canvasTex(512,512,(g,w,h)=>{ g.fillStyle=DUSK?'#3d5e33':'#557f35'; g.fillRect(0,0,w,h);
+  for(let k=0;k<20000;k++){ const v=rnd(); g.fillStyle= v<.5?'rgba(30,60,20,.25)':'rgba(140,170,70,.18)'; g.fillRect(rnd()*w,rnd()*h,1+rnd()*2,3+rnd()*4);} },[60,60]);
+const travTex = canvasTex(512,1024,(g,w,h)=>{ g.fillStyle='#d6c8b0'; g.fillRect(0,0,w,h);
+  for(let y=0;y<h;y+=64){ g.fillStyle='rgba(120,100,70,.35)'; g.fillRect(0,y,w,2); }
+  for(let k=0;k<400;k++){ g.strokeStyle=`rgba(150,125,90,${.08+rnd()*.15})`; g.lineWidth=1+rnd()*2; const y=rnd()*h; g.beginPath(); g.moveTo(0,y); for(let x=0;x<w;x+=32) g.lineTo(x, y+(rnd()-.5)*4); g.stroke(); } });
+function roomTex(variant){ return canvasTex(256,256,(g,w,h)=>{
+  const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'#fff1d6'); gr.addColorStop(.35,'#f2b56e'); gr.addColorStop(1,'#5a3418'); g.fillStyle=gr; g.fillRect(0,0,w,h);
+  const rg=g.createRadialGradient(w*(.3+variant*.12),12,4,w*(.3+variant*.12),12,140); rg.addColorStop(0,'rgba(255,250,235,.9)'); rg.addColorStop(1,'rgba(255,240,210,0)'); g.fillStyle=rg; g.fillRect(0,0,w,h);
+  g.fillStyle='rgba(40,22,10,.75)'; // furniture silhouettes
+  if(variant%2===0){ g.fillRect(w*.15,h*.68,w*.5,h*.14); g.fillRect(w*.15,h*.6,w*.08,h*.22); } else { g.fillRect(w*.55,h*.62,w*.06,h*.3); g.beginPath(); g.ellipse(w*.58,h*.6,22,14,0,0,7); g.fill(); g.fillRect(w*.1,h*.74,w*.35,h*.08); }
+  g.fillStyle='rgba(255,244,225,.55)'; g.fillRect(0,0,w*(.12+variant*.05),h); g.fillRect(w*(.88-variant*.03),0,w,h); // sheer curtains
+},[1,1]); }
+const roomTexs=[0,1,2,3].map(roomTex);
+
+// ---------- materials ----------
+const M = {
+  plaster: new THREE.MeshStandardMaterial({color:0xf1ede6, roughness:0.85}),
+  plaster2: new THREE.MeshStandardMaterial({color:0xddd6cb, roughness:0.9}),
+  slab: new THREE.MeshStandardMaterial({color:0xf7f5f0, roughness:0.6}),
+  stone: new THREE.MeshStandardMaterial({color:0x34312e, roughness:0.55}),
+  travertine: new THREE.MeshStandardMaterial({color:0xffffff, map:travTex, roughness:0.7}),
+  bronze: new THREE.MeshStandardMaterial({color:0x4a3826, metalness:0.85, roughness:0.3}),
+  dark: new THREE.MeshStandardMaterial({color:0x1d1d1f, metalness:0.5, roughness:0.4}),
+  wood: new THREE.MeshStandardMaterial({color:0xa87146, roughness:0.5}),
+  glass: new THREE.MeshStandardMaterial({color:0x22313a, metalness:DUSK?0.6:0.9, roughness:0.04, transparent:true, opacity:DUSK?0.22:0.38, depthWrite:false}),
+  rail: new THREE.MeshStandardMaterial({color:0xa9c7cf, metalness:0.7, roughness:0.03, transparent:true, opacity:0.2, depthWrite:false}),
+  lawn: new THREE.MeshStandardMaterial({map:lawnTex, roughness:1}),
+  paving: new THREE.MeshStandardMaterial({map:pavingTex, roughness:0.75}),
+  road: new THREE.MeshStandardMaterial({color:0x3b3b3d, roughness:0.9}),
+  water: new THREE.MeshStandardMaterial({color:0x0e3a44, metalness:1.0, roughness:0.04}),
+  foliage: new THREE.MeshStandardMaterial({color:DUSK?0x24401f:0x3f6a2c, roughness:0.85}),
+  foliage2: new THREE.MeshStandardMaterial({color:DUSK?0x2f4f26:0x5a8a3a, roughness:0.85}),
+  trunk: new THREE.MeshStandardMaterial({color:0x6b5a48, roughness:0.95}),
+};
+const roomMats = roomTexs.map(t=>new THREE.MeshStandardMaterial({color:0x111, emissive:0xffffff, emissiveMap:t, emissiveIntensity:DUSK?1.25:0.55}));
+const roomDark = new THREE.MeshStandardMaterial({color:DUSK?0x0f1216:0x2c3238, roughness:0.4, metalness:0.2});
+const lightStrip = new THREE.MeshStandardMaterial({color:0x222, emissive:0xffd6a0, emissiveIntensity:DUSK?3.0:0.6});
+
+const G = {};
+function box(mat, x0,y0,z0, x1,y1,z1){
+  const g = new THREE.BoxGeometry(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0));
+  g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);
+  (G[mat] ||= []).push(g);
+}
+const extra = [];
+function room(x0,y0,z0,x1,y1,z1){
+  const lit = rnd() < (DUSK ? 0.75 : 0.35);
+  const mat = lit ? roomMats[Math.floor(rnd()*roomMats.length)] : roomDark;
+  const g = new THREE.BoxGeometry(Math.abs(x1-x0)||0.02,Math.abs(y1-y0),Math.abs(z1-z0)||0.02);
+  g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);
+  extra.push(new THREE.Mesh(g, mat));
+}
+// ---------- dimensions from drawings ----------
+const FL = [0.65,3.45,6.25,9.05,11.85,14.65]; const ROOF = 17.45; const FH = 2.8;
+const XW = 2.0, XE = 14.3;            // main wall lines (grid 2 & 5)
+const XW0 = 0.0, XE0 = 16.3;          // balcony outer (grid 1 & 6)
+const Z0 = 0.0, Z1 = 32.0;
+const SLAB = 0.22;
+
+// plinth
+box('stone', XW-0.3,0,Z0-0.6, XE+0.3,0.65,Z1+0.3);
+
+// main body: solid ends + glazing per bay along long walls
+// core volume slightly inset behind facade so glazing reads
+box('plaster2', XW+1.0,0.65,Z0+0.2, XE-1.0,ROOF,Z1-0.2);
+
+// floor slab edges - crisp white bands, wrapping balconies
+const pods = {
+  W:[[18.9,29.1],[8.3,14.9]],
+  E:[[18.9,29.1],[0.3,14.9]],
+};
+for (const y of [...FL.slice(1), ROOF]){
+  box('slab', XW-0.05,y-SLAB,Z0-0.05, XE+0.05,y,Z1+0.05);
+}
+// facade bays along long walls (x = XW and XE)
+function longFacade(side){
+  const sx = side==='W' ? XW : XE; const out = side==='W' ? -1 : 1;
+  const inPod = z => pods[side].some(([a,b])=>z>a-0.01 && z<b+0.01);
+  // bays of 2.0m along length
+  for (let fi=0; fi<6; fi++){
+    const y0 = FL[fi], y1 = (FL[fi+1]??ROOF) - SLAB;
+    for (let z=0; z<32; z+=2){
+      const zc = z+1;
+      if (side==='W' && zc>3.8 && zc<8.3) continue; // stair curtain wall zone
+      // glass bay with bronze mullions
+      const gx = sx + out*0.02;
+      box('bronze', gx-0.04,y0,z, gx+0.04,y1,z+0.08);
+      const solid = !inPod(zc) && (Math.floor(z/2)%2===1);
+      if (solid){
+        // plaster pier with timber slat inlay
+        box('plaster', sx-0.03,y0,z+0.08, sx+0.03,y1,z+2);
+        for(let s=0;s<7;s++){ const zz=z+0.35+s*0.2; box('wood', sx+out*0.05-0.03,y0+0.1,zz, sx+out*0.05+0.03,y1-0.1,zz+0.07); }
+      } else {
+        extra.push(mesh('glass', gx,y0+0.05,z+0.08, gx+0.001,y1,z+2));
+        room(sx-out*0.95,y0,z+0.1, sx-out*0.95,y1,z+1.95);
+        box('bronze', gx-0.035,y0+0.9,z+0.08, gx+0.035,y0+0.95,z+2); // transom line
+      }
+    }
+  }
+}
+function mesh(mat,x0,y0,z0,x1,y1,z1){
+  const g = new THREE.BoxGeometry(Math.max(Math.abs(x1-x0),0.01),Math.abs(y1-y0),Math.max(Math.abs(z1-z0),0.01));
+  g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); const m = new THREE.Mesh(g, M[mat]); return m;
+}
+longFacade('W'); longFacade('E');
+
+// balcony pods on both sides
+function podSide(side){
+  const out = side==='W' ? -1 : 1; const xin = side==='W'?XW:XE; const xout = side==='W'?XW0:XE0;
+  const toilets = side==='W' ? [[22.85,25.15],[8.3,10.2]] : [[22.85,25.15],[6.85,9.15]];
+  for (const [a,b] of pods[side]){
+    for (let fi=0; fi<6; fi++){
+      const y = FL[fi]; const yTop = (FL[fi+1]??ROOF);
+      // balcony slab (thin, white, with hidden LED soffit line)
+      if (fi>0) box('slab', Math.min(xin,xout),y-SLAB,a, Math.max(xin,xout),y,b);
+      box('slab', Math.min(xin,xout),yTop-SLAB,a, Math.max(xin,xout),yTop,b);
+      extra.push(new THREE.Mesh((()=>{const g=new THREE.BoxGeometry(0.04,0.03,b-a-0.2); g.translate(xout-out*0.12,yTop-SLAB-0.02,(a+b)/2); return g;})(), lightStrip));
+      // glass balustrade with bronze cap
+      const xr = xout - out*0.05;
+      extra.push(mesh('rail', xr-0.01,y,a+0.05, xr+0.01,y+1.1,b-0.05));
+      box('bronze', xr-0.03,y+1.08,a+0.05, xr+0.03,y+1.13,b-0.05);
+      // toilet boxes clad in vertical timber slats
+      for (const [ta,tb] of toilets){ if (ta<a||tb>b) continue;
+        box('plaster', Math.min(xin,xout+out*0.25),y,ta, Math.max(xin,xout+out*0.25),yTop-SLAB,tb);
+        const n = Math.floor((tb-ta)/0.12);
+        for(let s=0;s<n;s++){ const zz=ta+0.03+s*0.12; box('wood', xout+out*0.15-0.03,y,zz, xout+out*0.15+0.04,yTop-SLAB,zz+0.06); }
+      }
+      // planter at balcony edge
+      box('dark', xout-out*0.35-0.18,y,a+0.1, xout-out*0.35+0.18,y+0.45,a+0.7);
+      box('foliage2', xout-out*0.35-0.16,y+0.45,a+0.12, xout-out*0.35+0.16,y+0.85,a+0.68);
+    }
+    // pod end fins (full height, bronze)
+    for (const zz of [a,b]) box('slab', Math.min(xin,xout)-0.0,FL[0],zz-0.09, Math.max(xin,xout),ROOF,zz+0.09);
+  }
+}
+podSide('W'); podSide('E');
+
+// west stair tower - full height curtain wall (CW1 3200 wide)
+box('plaster', XW-0.4,0.65,3.8, XW,ROOF+0.5,4.0);
+box('plaster', XW-0.4,0.65,8.1, XW,ROOF+0.5,8.3);
+extra.push(mesh('glass', XW-0.3,0.65,4.0, XW-0.29,ROOF+0.3,8.1));
+room(XW+0.3,0.65,4.1, XW+0.3,ROOF,8.0);
+for (let y=0.65; y<ROOF; y+=1.4) box('bronze', XW-0.33,y,4.0, XW-0.27,y+0.05,8.1);
+for (const z of [4.0,5.0,6.0,7.0,8.1]) box('bronze', XW-0.34,0.65,z-0.03, XW-0.26,ROOF+0.3,z+0.03);
+
+// north stair - curtain wall CW2 between grid 3-4 at Z1
+extra.push(mesh('glass', 7.15,0.65,Z1+0.25, 9.15,ROOF+0.6,Z1+0.26));
+room(7.2,0.65,Z1-0.4, 9.1,ROOF,Z1-0.4);
+box('plaster', 6.8,0.65,Z1-0.2, 7.15,ROOF+0.6,Z1+0.4);
+box('plaster', 9.15,0.65,Z1-0.2, 9.5,ROOF+0.6,Z1+0.4);
+for (let y=0.65; y<ROOF+0.6; y+=1.4) box('bronze', 7.15,y,Z1+0.24, 9.15,y+0.05,Z1+0.3);
+box('bronze', 8.12,0.65,Z1+0.24, 8.18,ROOF+0.6,Z1+0.3);
+// north end walls: travertine with timber screen
+for (const [x0,x1] of [[XW,6.8],[9.5,XE]]){
+  box('travertine', x0,0.65,Z1-0.2, x1,ROOF,Z1+0.05);
+  for (let x=x0+0.5; x<x1-0.4; x+=0.18) box('wood', x,1.2,Z1+0.05, x+0.07,ROOF-0.3,Z1+0.14);
+}
+
+// south end: lift/electrical core (west) + bedroom block (east) w/ deep frames
+box('travertine', XW+0.3,0.65,Z0-0.35, 7.0,18.775,Z0+0.6); // lift tower to elevator roof +18.775
+for (let y=1.5; y<18.5; y+=0.5) box('bronze', XW+0.3,y,Z0-0.37, 7.0,y+0.03,Z0-0.34); // fine reveals
+box('plaster', 9.3,0.65,Z0-0.05, XE,ROOF,Z0+0.2);
+for (let fi=0; fi<6; fi++){ const y0=FL[fi], y1=(FL[fi+1]??ROOF)-SLAB;
+  // deep picture frame window
+  box('bronze', 10.4,y0+0.25,Z0-0.45, 13.4,y0+0.33,Z0+0.1);
+  box('bronze', 10.4,y1-0.08,Z0-0.45, 13.4,y1,Z0+0.1);
+  box('bronze', 10.4,y0+0.25,Z0-0.45, 10.45,y1,Z0+0.1);
+  box('bronze', 13.35,y0+0.25,Z0-0.45, 13.4,y1,Z0+0.1);
+  extra.push(mesh('glass', 10.48,y0+0.33,Z0-0.06, 13.32,y1-0.08,Z0-0.05));
+  room(10.5,y0+0.3,Z0+0.3, 13.3,y1,Z0+0.3);
+}
+// corridor end glazing south
+for (let fi=0; fi<6; fi++){ const y0=FL[fi], y1=(FL[fi+1]??ROOF)-SLAB;
+  extra.push(mesh('glass', 7.1,y0,Z0+0.05, 9.2,y1,Z0+0.06)); room(7.1,y0,Z0+0.5,9.2,y1,Z0+0.5);
+  box('bronze', 7.0,y0,Z0-0.0, 9.3,y0+0.06,Z0+0.1);
+}
+
+// entrance canopy (A-B, west) at +3.45 – cantilevered blade with soffit lights
+box('slab', XW-2.8,3.25,Z0-2.6, 7.2,3.55,4.0);
+box('wood', XW-2.75,3.18,Z0-2.55, 7.15,3.25,3.95);
+for (let i=0;i<5;i++){ const m=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.02,16), lightStrip); m.position.set(XW-1.8+i*2.0,3.16,-1.0); extra.push(m); }
+box('stone', XW-2.8,0,Z0-2.6, 7.2,0.65,4.0);           // arrival terrace
+for(let s=0;s<4;s++) box('stone', XW-2.8-0.35*(s+1),0,Z0-2.6, XW-2.8-0.35*s,0.65-0.16*(s+1),4.0); // steps
+extra.push(mesh('glass', XW+0.3,0.65,0.62, 7.0,3.25,0.63)); room(XW+0.5,0.65,1.2, 6.8,3.2,1.2);
+
+// floating roof: thin plane with 5° butterfly hint, 1m overhang (from roof plan 18.3 wide)
+{
+  const t=0.18, ov=1.0;
+  const mk=(x0,x1,tilt)=>{ const g=new THREE.BoxGeometry(x1-x0,t,Z1-Z0+2*ov); const m=new THREE.Mesh(g,M.slab);
+    m.position.set((x0+x1)/2, ROOF+0.55, (Z0+Z1)/2); m.rotation.z=tilt; m.castShadow=m.receiveShadow=true; return m; };
+  extra.push(mk(XW0-ov, 7.95, -0.06), mk(8.35, XE0+ov, 0.06));
+  const fas=(x0,x1,tilt)=>{ const g=new THREE.BoxGeometry(x1-x0,0.06,Z1-Z0+2*ov+0.02); const m=new THREE.Mesh(g,lightStrip);
+    m.position.set((x0+x1)/2, ROOF+0.43, (Z0+Z1)/2); m.rotation.z=tilt; return m;};
+  if (false) { extra.push(fas(XW0-ov+0.1,7.9,-0.06), fas(8.4,XE0+ov-0.1,0.06)); }
+  box('bronze', XW,ROOF,Z0, XE,ROOF+0.45,Z1); // recessed clerestory band
+}
+
+
+// ================= SITE =================
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(3000,3000), M.lawn); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+lawnTex.repeat.set(600,600);
+{ const g=new THREE.PlaneGeometry(40,60); const m=new THREE.Mesh(g,M.paving); m.rotation.x=-Math.PI/2; m.position.set(9,0.03,14); m.receiveShadow=true; scene.add(m); pavingTex.repeat.set(40/4.8,60/4.8); }
+box('road', -60,0,-34, 80,0.03,-24);
+
+// reflecting pool parallel to east façade
+const PX0=19.6, PX1=40, PZ0=-12, PZ1=36;
+const refl = new Reflector(new THREE.PlaneGeometry(PX1-PX0, PZ1-PZ0), {textureWidth:Math.min(W,2048), textureHeight:Math.min(H,1152), color: DUSK?0x8a96a0:0x9aa8ae, clipBias:0.003});
+refl.rotation.x=-Math.PI/2; refl.position.set((PX0+PX1)/2, 0.16, (PZ0+PZ1)/2); scene.add(refl);
+for (const [a,b,c,d] of [[PX0-0.5,PZ0-0.5,PX0,PZ1+0.5],[PX1,PZ0-0.5,PX1+0.5,PZ1+0.5],[PX0,PZ0-0.5,PX1,PZ0],[PX0,PZ1,PX1,PZ1+0.5]]) box('travertine', a,0,b, c,0.3,d);
+// stepping stones / deck across pool & lawn beyond
+box('lawn', PX1+0.5,0.0,-30, 70,0.05,70);
+// pool underwater lights
+const poolLights=[]; for(let z=PZ0+2; z<PZ1; z+=4) poolLights.push(z);
+for (const z of poolLights){ const m=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.04,0.5), lightStrip); m.position.set(PX0+0.02,0.25,z); extra.push(m); const m2=m.clone(); m2.position.x=PX1-0.02; extra.push(m2); }
+
+// ================= VEGETATION =================
+function frondTexture(){ return canvasTex(512,128,(g,w,h)=>{ g.clearRect(0,0,w,h);
+  for(let x=14;x<500;x+=5){ const t=x/512; const len=8+58*Math.pow(Math.sin(Math.PI*Math.min(t*1.15,1)),0.7);
+    for(const s of [-1,1]){ const v=0.75+rnd()*0.5; g.strokeStyle=`rgb(${(48*v)|0},${(96*v)|0},${(34*v)|0})`; g.lineWidth=3.2-1.8*t;
+      g.beginPath(); g.moveTo(x,64); g.quadraticCurveTo(x+len*0.25,64+s*len*0.6, x+len*0.55,64+s*len); g.stroke(); } }
+  g.strokeStyle='#6f7a3a'; g.lineWidth=4; g.beginPath(); g.moveTo(0,64); g.lineTo(500,64); g.stroke(); },[1,1]); }
+const frondMat = new THREE.MeshStandardMaterial({map:frondTexture(), alphaTest:0.45, side:THREE.DoubleSide, roughness:0.8, color:DUSK?0xb8c8b0:0xffffff});
+const ringTex = canvasTex(64,256,(g,w,h)=>{ g.fillStyle='#7b6a57'; g.fillRect(0,0,w,h); for(let y=0;y<h;y+=16){ g.fillStyle='rgba(60,48,36,.7)'; g.fillRect(0,y,w,4); g.fillStyle='rgba(170,150,125,.35)'; g.fillRect(0,y+5,w,3);} });
+const palmTrunkMat = new THREE.MeshStandardMaterial({map:ringTex, roughness:0.95});
+const frondGeos=[], trunkGeos=[], crownGeos=[];
+const uplights=[];
+function palm(x,z,Ht=9, lean=0.6){
+  const la = rnd()*Math.PI*2; const lx=Math.cos(la)*lean, lz=Math.sin(la)*lean;
+  const tg = new THREE.CylinderGeometry(0.16,0.24,Ht,12,10,true); tg.translate(0,Ht/2,0);
+  const p=tg.attributes.position, uv=tg.attributes.uv; for(let i=0;i<p.count;i++){ const t=p.getY(i)/Ht; p.setX(i,p.getX(i)+lx*t*t); p.setZ(i,p.getZ(i)+lz*t*t); uv.setY(i, uv.getY(i)*Ht*1.6); }
+  tg.computeVertexNormals(); tg.translate(x,0,z); trunkGeos.push(tg);
+  const cx=x+lx, cz=z+lz, cy=Ht;
+  const cg=new THREE.SphereGeometry(0.28,10,8); cg.scale(1,1.6,1); cg.translate(cx,cy-0.1,cz); crownGeos.push(cg);
+  const n = 16;
+  for(let i=0;i<n;i++){
+    const L = 3.6 + rnd()*1.2, Wd = 1.5;
+    const g = new THREE.PlaneGeometry(L, Wd, 22, 2); g.rotateX(-Math.PI/2); g.translate(L/2,0,0);
+    const up = i<5 ? 0.9+rnd()*0.4 : 0.25+rnd()*0.4;
+    const pa=g.attributes.position; for(let k=0;k<pa.count;k++){ const u=pa.getX(k)/L, zz=pa.getZ(k);
+      pa.setY(k, L*(up*u - 0.95*u*u) - Math.abs(zz)*0.35); pa.setZ(k, zz*(0.25+0.75*Math.sin(Math.PI*Math.min(u*1.3,1)))); }
+    g.computeVertexNormals();
+    g.rotateY(i/n*Math.PI*2 + rnd()*0.3); g.translate(cx,cy,cz); frondGeos.push(g);
+  }
+  if (DUSK) uplights.push([x,z,Ht]);
+}
+function blobGeo(r, det=3, rough=0.22, col){
+  const g = new THREE.IcosahedronGeometry(r, det); const p=g.attributes.position; const cols=[];
+  const ph=[rnd()*9,rnd()*9,rnd()*9];
+  for(let i=0;i<p.count;i++){ const v=new THREE.Vector3().fromBufferAttribute(p,i); const n=v.clone().normalize();
+    const hn = Math.sin(n.x*41.3+n.y*17.1+n.z*29.7+ph[0])*0.5;
+    const d = 1 + rough*(Math.sin(n.x*7+ph[0])*Math.sin(n.y*6+ph[1])*Math.sin(n.z*8+ph[2])) + hn*0.12 + 0.08*Math.sin(n.x*23+n.z*19+ph[1]);
+    v.copy(n.clone().multiplyScalar(r*d)); p.setXYZ(i,v.x,v.y,v.z);
+    const c=new THREE.Color(col).multiplyScalar(0.72+0.42*Math.max(0,n.y)+ hn*0.25); cols.push(c.r,c.g,c.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(cols,3)); g.computeVertexNormals(); return g; }
+const leafMat = new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.85});
+const leafGeos=[];
+function tree(x,z,s=1, col=DUSK?0x2d4a26:0x4b7a33){
+  const tg=new THREE.CylinderGeometry(0.12*s,0.22*s,3.2*s,8); tg.translate(x,1.6*s,z); trunkGeos.push(tg);
+  for(let i=0;i<20;i++){ const r=(0.6+rnd()*0.6)*s; const g=blobGeo(r,3,0.3,col);
+    g.translate(x+(rnd()-0.5)*3.4*s, (3.4+rnd()*2.8)*s, z+(rnd()-0.5)*3.4*s); leafGeos.push(g); } }
+function shrub(x,z,r=0.7,col=DUSK?0x2a4a24:0x4f8a36){ const g=blobGeo(r,3,0.18,col); g.scale(1.3,0.75,1.3); g.translate(x,r*0.55,z); leafGeos.push(g); }
+
+// palms framing the pool + building
+for (const [x,z] of [[26,-14.5],[44.2,-10.4],[33.1,-19.2],[43,0],[43.5,14],[42.5,28],[30,38],[22,38.5]]) palm(x, z, 9+rnd()*3.5, 0.5+rnd()*0.7);
+for (const [x,z,h] of [[13,-11,8.5],[4,-12,9.5],[-6,-8,10],[-6,6,9],[-6,22,10.5],[-5,36,9],[10,40,11],[50,-18,12],[52,6,12],[16,-18,9]]) palm(x,z,h,0.4+rnd()*0.7);
+// broadleaf canopy trees behind / beyond
+for (const [x,z,s] of [[-24,-16,1.6],[-20,22,1.8],[-12,48,1.7],[6,60,1.9],[26,62,1.6],[52,44,1.8],[48,24,1.7],[52,-2,1.5],[-24,30,2.0]]) tree(x,z,s);
+// shrubs & flowering planting along façade and pool
+for (let z=-3; z<35; z+=1.3) shrub(18.3+(rnd()-0.5)*0.4, z, 0.55+rnd()*0.3);
+for (let z=-4; z<36; z+=2.2) shrub(PX1+1.6+(rnd()-0.5), z, 0.6+rnd()*0.4, rnd()<0.3 ? 0xa83a6a : (DUSK?0x2a4a24:0x4f8a36));
+for (let x=-4; x<18; x+=1.4) shrub(x, -4.6+(rnd()-0.5)*0.4, 0.5+rnd()*0.3, rnd()<0.25 ? 0xb8506e : (DUSK?0x2a4a24:0x4f8a36));
+
+function addMerged(geos, mat){ if(!geos.length) return; const m=new THREE.Mesh(mergeGeometries(geos), mat); m.castShadow=true; m.receiveShadow=true; scene.add(m); return m; }
+addMerged(frondGeos, frondMat); addMerged(trunkGeos, palmTrunkMat); addMerged(crownGeos, M.trunk); addMerged(leafGeos, leafMat);
+
+// garden bollards
+for (let z=-4; z<36; z+=4){ for (const x of [17.4]){ const b=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.75,10), M.dark); b.position.set(x,0.375,z); extra.push(b);
+  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.075,0.075,0.1,10), lightStrip); cap.position.set(x,0.66,z); extra.push(cap);} }
+
+// ================= NIGHT LIGHTING =================
+if (DUSK){
+  for (const [x,z,h] of uplights.slice(0,14)){ const sp=new THREE.SpotLight(0xffd29a, 60, h+6, 0.32, 0.6, 1.5); sp.position.set(x+0.7,0.2,z+0.4); sp.target.position.set(x,h,z); scene.add(sp,sp.target); }
+  for (const z of [1,9,17,25,33]){ const sp=new THREE.SpotLight(0xffc98a, 90, 24, 0.3, 0.75, 1.4); sp.position.set(17.6,0.4,z); sp.target.position.set(16,15,z); scene.add(sp,sp.target); }
+  for (const x of [4,11]){ const sp=new THREE.SpotLight(0xffc98a, 90, 24, 0.33, 0.75, 1.4); sp.position.set(x,0.4,-2.4); sp.target.position.set(x,15,0); scene.add(sp,sp.target); }
+} else {
+  // warm bounce from low sun on the end wall
+  const fill = new THREE.DirectionalLight(0xffd2a8, 0.35); fill.position.set(60,20,-10); scene.add(fill);
+}
+
+// ---------- build merged building meshes ----------
+for (const k in G){ const m=new THREE.Mesh(mergeGeometries(G[k]), M[k]); m.castShadow=true; m.receiveShadow=true; scene.add(m); }
+for (const m of extra){ if(!m.material.transparent){ m.castShadow=true; m.receiveShadow=true;} scene.add(m); }
+
+
+  return scene;
+}
+
+// ---------- renderer ----------
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+stage.prepend(renderer.domElement);
+const cam = new THREE.PerspectiveCamera(38, 1, 0.3, 4000);
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI*0.495;
+cam.position.set(50,30,-24); controls.target.set(8,7,15);
+
+// ---------- 4D scene ----------
+const s4 = new THREE.Scene(); s4.background = new THREE.Color(0xcfdbe6); s4.fog = new THREE.Fog(0xcfdbe6, 160, 600);
+s4.add(new THREE.HemisphereLight(0xdfe9ff, 0x6b5f50, 1.1));
+const sun = new THREE.DirectionalLight(0xfff2de, 2.8); sun.position.set(60,90,-50); sun.target.position.set(8,0,16);
+sun.castShadow = true; sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-50,right:50,top:50,bottom:-50,near:1,far:300}); sun.shadow.bias=-0.0004; sun.shadow.normalBias=0.04;
+s4.add(sun, sun.target);
+const mats = makeConMaterials(THREE);
+const site = new THREE.MeshStandardMaterial({color:0xb5ad9b, roughness:1}), outer = new THREE.MeshStandardMaterial({color:0x7f9466, roughness:1}), wm = new THREE.MeshStandardMaterial({color:0x6e5238, roughness:1});
+function plane(grp,x0,z0,x1,z1,y,m){ const g=new THREE.PlaneGeometry(x1-x0,z1-z0); g.rotateX(-Math.PI/2); g.translate((x0+x1)/2,y,(z0+z1)/2); const me=new THREE.Mesh(g,m); me.receiveShadow=true; grp.add(me); }
+const og = new THREE.Group(); plane(og,-800,-800,-22,800,-0.02,outer); plane(og,40,-800,800,800,-0.02,outer); plane(og,-22,-800,40,-30,-0.02,outer); plane(og,-22,52,40,800,-0.02,outer); s4.add(og);
+
+const T0 = Date.parse('2026-09-01T00:00:00Z'), DAYMS = 86400000, STATUS_I = Math.round((Date.parse('2027-05-22T00:00:00Z')-T0)/DAYMS);
+const TH_M=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDate = s => { const d=new Date(s+'T00:00:00Z'); return `${d.getUTCDate()} ${TH_M[d.getUTCMonth()]} ${d.getUTCFullYear()+543}`; };
+const st = { day: STATUS_I, mode:'actual', status:false, cut:99 };
+let cur=null, ground=null;
+const $ = id => document.getElementById(id);
+$('date').value = st.day;
+const NAMES={'Autoclaved Aerated Concrete':'ก่อผนังมวลเบา AAC','Plastering':'ฉาบปูน','Ceramic Wall Tile':'บุกระเบื้องผนัง','Ceramic Floor Tile':'ปูกระเบื้องพื้น','Trowel Finish':'ขัดมันพื้น','Ceiling Frame':'โครงฝ้าเพดาน','Gypsum board':'ฝ้ายิปซัมบอร์ด','Door / Window Frame':'วงกบประตู/หน้าต่าง','Door / Window Leaf':'บานประตู/หน้าต่าง','Hardware - Hinge, Lock, Handle':'อุปกรณ์ประตู','Primer':'ทาสีรองพื้น','Finish Coat':'ทาสีจริง','Toilet Waterproofing':'กันซึมห้องน้ำ','Terrace Waterproofing':'กันซึมระเบียง','Water Ponding Test':'ทดสอบขังน้ำ','Sanitary Ware':'สุขภัณฑ์','Accessories':'อุปกรณ์ห้องน้ำ','Tread / Riser Finishing':'ผิวบันได','Handrail / Balustrade':'ราวบันได'};
+function rebuild(){
+  const ds = new Date(T0 + st.day*DAYMS).toISOString().slice(0,10);
+  if (cur){ s4.remove(cur); cur.traverse(o=>o.geometry&&o.geometry.dispose()); }
+  if (ground) s4.remove(ground);
+  const { group, info } = buildConstruction(THREE, mergeGeometries, sched, ds, { mode: st.mode, status: st.status, cut: st.cut, mats });
+  cur = group; s4.add(group);
+  ground = new THREE.Group();
+  if (info.pit > 0){ const a=[0.5,-1.5,15.8,33.5]; plane(ground,-22,-30,40,a[1],0,site); plane(ground,-22,a[3],40,52,0,site); plane(ground,-22,a[1],a[0],a[3],0,site); plane(ground,a[2],a[1],40,a[3],0,site);
+    for (const [x0,z0,x1,z1] of [[a[0],a[1],a[2],a[1]],[a[0],a[3],a[2],a[3]],[a[0],a[1],a[0],a[3]],[a[2],a[1],a[2],a[3]]]){ const bg=new THREE.BoxGeometry(Math.max(x1-x0,.05),1.6,Math.max(z1-z0,.05)); bg.translate((x0+x1)/2,-0.8,(z0+z1)/2); ground.add(new THREE.Mesh(bg,wm)); } }
+  else plane(ground,-22,-30,40,52,0,site);
+  s4.add(ground);
+  $('bDate').textContent = thDate(ds);
+  $('bMode').textContent = (st.mode==='plan'?'ตามแผน (Baseline)':'ตามจริง (Actual)') + (st.mode==='actual' && st.day>STATUS_I ? ' · ค้างสถานะ ณ 22 พ.ค. 70' : '');
+  // list
+  let rows;
+  if (st.cut < 99) { const pf = progressFn(sched, ds, st.mode); rows = sched.tasks.filter(x=>x.g==='A'&&String(x.fl)===String(st.cut)).map(t=>[NAMES[t.act]||t.act, pf('A',st.cut,t.el,t.act)]); $('listTitle').textContent = `งานสถาปัตย์ ชั้น ${st.cut}`; }
+  else { rows = info.active.slice(0,12); $('listTitle').textContent = 'งานที่กำลังดำเนินการ'; }
+  $('list').innerHTML = rows.length ? rows.map(([n,v])=>{ const c = v>=0.999?'var(--ok)':(v>0.001?'var(--wip)':'var(--line)'); return `<div class="task"><span>${n}</span><span class="bar"><i style="width:${Math.round(v*100)}%;background:${c}"></i></span><em>${Math.round(v*100)}%</em></div>`; }).join('') : '<div class="note">ไม่มีงานที่กำลังดำเนินการในวันนี้</div>';
+}
+// ---------- lux scene (lazy) ----------
+let lux = { golden:null, night:null }, luxMode='golden', composer=null, tab='4d';
+function luxScene(){ if(!lux[luxMode]) lux[luxMode] = makeLux(renderer, luxMode==='night', 1600, 900); return lux[luxMode]; }
+function setupComposer(){
+  const sc = tab==='4d' ? s4 : luxScene();
+  composer = new EffectComposer(renderer); composer.addPass(new RenderPass(sc, cam));
+  if (tab==='lux') composer.addPass(new UnrealBloomPass(new THREE.Vector2(800,450), luxMode==='night'?0.6:0.2, 0.55, luxMode==='night'?0.8:0.92));
+  composer.addPass(new OutputPass()); resize();
+  renderer.toneMappingExposure = tab==='lux' ? (luxMode==='night'?1.0:0.9) : 1.0;
+}
+const luxViews = { golden:{p:[47,2.6,-22],t:[8,8.6,15]}, aerial:{p:[58,36,-34],t:[8,6,15]}, west:{p:[-30,2.2,-15],t:[5,8.5,9]} };
+function goView(v){ cam.position.set(...v.p); controls.target.set(...v.t); controls.update(); }
+function resize(){ const r = stage.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); cam.aspect = r.width/Math.max(r.height,1); cam.updateProjectionMatrix(); composer && composer.setSize(r.width, r.height); }
+new ResizeObserver(resize).observe(stage);
+
+// ---------- UI ----------
+let timer=null;
+$('date').addEventListener('input', e=>{ st.day=+e.target.value; rebuild(); });
+$('toStatus').addEventListener('click', ()=>{ st.day=STATUS_I; $('date').value=st.day; rebuild(); });
+$('play').addEventListener('click', ()=>{
+  if (timer){ clearInterval(timer); timer=null; $('play').textContent='▶ เล่นลำดับก่อสร้าง'; return; }
+  if (st.day >= 354) st.day = 0; $('play').textContent='❚❚ หยุด';
+  timer = setInterval(()=>{ st.day = Math.min(354, st.day+3); $('date').value = st.day; rebuild(); if(st.day>=354){ clearInterval(timer); timer=null; $('play').textContent='▶ เล่นลำดับก่อสร้าง'; } }, 90);
+});
+function seg(id, fn){ $(id).addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return; [...$(id).children].forEach(x=>x.setAttribute('aria-pressed', x===b)); fn(b.dataset.v); }); }
+seg('modeSeg', v=>{ st.mode=v; rebuild(); });
+seg('viewSeg', v=>{ st.status = v==='status'; $('legend').hidden = !st.status; rebuild(); });
+$('cut').addEventListener('change', e=>{ st.cut=+e.target.value; rebuild(); });
+seg('luxSeg', v=>{ luxMode=v; setupComposer(); });
+$('luxCam').addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) goView(luxViews[b.dataset.v]); });
+function setTab(t){ tab=t; $('tab4d').setAttribute('aria-selected', t==='4d'); $('tabLux').setAttribute('aria-selected', t==='lux');
+  $('rail4d').hidden = t!=='4d'; $('railLux').hidden = t!=='lux'; document.querySelector('.badge').hidden = t!=='4d';
+  if (t==='lux') { goView(luxViews.golden); } else { cam.position.set(50,30,-24); controls.target.set(8,7,15); }
+  setupComposer(); }
+$('tab4d').addEventListener('click', ()=>setTab('4d')); $('tabLux').addEventListener('click', ()=>setTab('lux'));
+if (location.hash === '#finished') setTab('lux'); else setupComposer();
+rebuild();
+renderer.setAnimationLoop(()=>{ controls.update(); composer.render(); });
+</script>
