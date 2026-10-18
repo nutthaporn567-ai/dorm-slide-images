@@ -270,7 +270,7 @@ h2{font-weight:200;letter-spacing:.01em}.kicker,.chap-no .t{letter-spacing:.22em
       <div class="chap-no"><span class="n">05</span><span class="r"></span><span class="t">S-Curve · Earned Value · May 2027</span></div>
       <div class="head">
         <h2>ทำงานได้ <em>89%</em> ของแผน ใช้เงินเกินมูลค่างาน</h2>
-        <p class="muted">PV 18.91 · EV 16.85 · AC 18.37 ล้านบาท งานโครงสร้างทุกชั้นเกินงบราว 10% และพื้นดาดฟ้ามีค่าใช้จ่าย 0.33 ลบ. ทั้งที่ผลงานยังเป็นศูนย์</p>
+        <p class="muted">PV 18.91 · EV 16.85 · AC 18.04 ล้านบาท งานโครงสร้างทุกชั้นเกินงบราว 10% ส่วนพื้นดาดฟ้าและหลังคายังไม่เริ่ม</p>
       </div>
       <div class="grid2">
         <div style="min-width:0">
@@ -280,11 +280,11 @@ h2{font-weight:200;letter-spacing:.01em}.kicker,.chap-no .t{letter-spacing:.22em
         <div style="min-width:0">
           <div class="kpis">
             <div class="kpi"><small>SPI = EV ÷ PV</small><b class="bad">0.89</b><span>ช้ากว่าแผน</span></div>
-            <div class="kpi"><small>CPI = EV ÷ AC</small><b class="bad">0.92</b><span>เกินงบ</span></div>
+            <div class="kpi"><small>CPI = EV ÷ AC</small><b class="bad">0.93</b><span>เกินงบ</span></div>
             <div class="kpi"><small>SV</small><b>−2.07</b><span>ล้านบาท</span></div>
-            <div class="kpi"><small>CV</small><b>−1.53</b><span>ล้านบาท</span></div>
-            <div class="kpi"><small>EAC = BAC ÷ CPI</small><b>24.50</b><span>ล้านบาท (งบ 22.47)</span></div>
-            <div class="kpi"><small>TCPI</small><b>1.37</b><span>ต้องคุมต้นทุนงานที่เหลือ</span></div>
+            <div class="kpi"><small>CV</small><b>−1.19</b><span>ล้านบาท</span></div>
+            <div class="kpi"><small>EAC = BAC ÷ CPI</small><b>24.06</b><span>ล้านบาท (งบ 22.47)</span></div>
+            <div class="kpi"><small>TCPI</small><b>1.27</b><span>ต้องคุมต้นทุนงานที่เหลือ</span></div>
           </div>
         </div>
       </div>
@@ -365,7 +365,7 @@ h2{font-weight:200;letter-spacing:.01em}.kicker,.chap-no .t{letter-spacing:.22em
 (function(){
 const S=[0,2155120,3475564.31,4883038.63,6905504.19,8951031.76,11336977.18,14763600.09,17165571.05,19413714.56,20963733.57,22378597.75,22466881.48];
 const P=[0,2156212.27,3434524.93,4877935.93,6720088.16,8640055.32,10607606.99,13819892.41,15731773.69,16845073.41];
-const A=[0,2371833.49,3777977.44,5365729.56,7392097.05,9504060.99,11663170.89,15065599.34,16982351.15,18370524.83];
+const A=[0,2371833.49,3777977.44,5365729.56,7392097.05,9504060.99,11663170.89,15065599.34,16982351.15,18039985.87];
 const M=['เริ่ม','ก.ย.','ต.ค.','พ.ย.','ธ.ค.','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.'];
 const BAC=22466881.48, W=720, H=400, x0=48, x1=650, y0=350, y1=24;
 const X=i=>x0+(x1-x0)*i/12, Y=v=>y0-(y0-y1)*v/BAC;
@@ -376,8 +376,8 @@ for(let p=0;p<=100;p+=25){const y=Y(BAC*p/100);g+=`<line x1="${x0}" x2="${x1}" y
 M.forEach((m,i)=>{g+=`<text x="${X(i)}" y="${y0+20}" text-anchor="middle" fill="${css('--muted')}" font-size="11" font-family="Anuphan">${m}</text>`;});
 const sx=X(8+22/31);g+=`<line x1="${sx}" x2="${sx}" y1="${y1}" y2="${y0}" stroke="${css('--bronze')}" stroke-dasharray="4 5"/><text x="${sx}" y="${y1-6}" text-anchor="middle" fill="${css('--bronze')}" font-size="11" font-family="Manrope">22 พ.ค. 70</text>`;
 const XI=i=>i<9?i:8+22/31; const SS=[0,2155120,3475564.31,4883038.63,6905504.19,8951031.76,11336977.18,14763600.09,17165571.05,18910438.69];const path2=a=>a.map((v,i)=>(i?'L':'M')+X(XI(i)).toFixed(1)+' '+Y(v).toFixed(1)).join(' ');g+=`<path d="M${X(8+22/31).toFixed(1)} ${Y(SS[9]).toFixed(1)} L${X(9)} ${Y(S[9])} L${X(10)} ${Y(S[10])} L${X(11)} ${Y(S[11])} L${X(12)} ${Y(S[12])}" fill="none" stroke="${css('--pv')}" stroke-width="2" stroke-dasharray="5 5" opacity=".6"/>`;for(const [arr,c,w] of [[SS,css('--pv'),2.5],[A,css('--ac'),3],[P,css('--ev'),3]]){g+=`<path d="${path2(arr)}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round"/>`;arr.forEach((v,i)=>{g+=`<circle cx="${X(XI(i))}" cy="${Y(v)}" r="${i===9?5:2.6}" fill="${c}"/>`;});}
-g+=`<text x="${sx+10}" y="${Y(SS[9])-6}" fill="${css('--pv')}" font-size="12" font-family="Manrope">PV 84.2%</text><text x="${sx+10}" y="${Y(A[9])+4}" fill="${css('--ac')}" font-size="12" font-family="Manrope">AC 81.8%</text><text x="${sx+10}" y="${Y(P[9])+5}" fill="${css('--ev')}" font-size="12" font-family="Manrope">EV 75.0%</text>`;
-document.getElementById('scurve').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="S-Curve: แผน 84.2% ต้นทุนจริง 81.8% ผลงาน 75.0% ณ 22 พ.ค. 70">${g}</svg>`;
+g+=`<text x="${sx+10}" y="${Y(SS[9])-6}" fill="${css('--pv')}" font-size="12" font-family="Manrope">PV 84.2%</text><text x="${sx+10}" y="${Y(A[9])+4}" fill="${css('--ac')}" font-size="12" font-family="Manrope">AC 80.3%</text><text x="${sx+10}" y="${Y(P[9])+5}" fill="${css('--ev')}" font-size="12" font-family="Manrope">EV 75.0%</text>`;
+document.getElementById('scurve').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="S-Curve: แผน 84.2% ต้นทุนจริง 80.3% ผลงาน 75.0% ณ 22 พ.ค. 70">${g}</svg>`;
 const CH=[{"fl": 4, "n": "ก่อผนัง AAC", "d": "20 พ.ค. – 1 มิ.ย.", "p": 0}, {"fl": 4, "n": "ฉาบปูน", "d": "27 พ.ค. – 8 มิ.ย.", "p": 0}, {"fl": 5, "n": "ก่อผนัง AAC", "d": "12 มิ.ย. – 24 มิ.ย.", "p": 0}, {"fl": 5, "n": "ฉาบปูน", "d": "19 มิ.ย. – 1 ก.ค.", "p": 0}, {"fl": 6, "n": "ก่อผนัง AAC", "d": "6 ก.ค. – 17 ก.ค.", "p": 0}, {"fl": 6, "n": "ฉาบปูน", "d": "13 ก.ค. – 24 ก.ค.", "p": 0}, {"fl": 6, "n": "ปูกระเบื้องพื้น", "d": "17 ก.ค. – 26 ก.ค.", "p": 0}, {"fl": 6, "n": "โครงฝ้า", "d": "21 ก.ค. – 29 ก.ค.", "p": 0}, {"fl": 6, "n": "ยิปซัมบอร์ด", "d": "27 ก.ค. – 4 ส.ค.", "p": 0}, {"fl": 6, "n": "บานประตู/หน้าต่าง", "d": "11 ส.ค. – 14 ส.ค.", "p": 0}, {"fl": 6, "n": "อุปกรณ์ประตู", "d": "16 ส.ค. – 16 ส.ค.", "p": 0}, {"fl": 6, "n": "ทาสีรองพื้น", "d": "2 ส.ค. – 6 ส.ค.", "p": 0}, {"fl": 6, "n": "ทาสีจริง", "d": "5 ส.ค. – 10 ส.ค.", "p": 0}];
 document.getElementById('chain').innerHTML=CH.map((c,i)=>`<div class="link"><small><span>Level ${c.fl}</span><i>${String(i+1).padStart(2,'0')}</i></small><b>${c.n}</b><span>${c.d}</span><div class="pg"><i style="width:${c.p}%"></i></div></div>`).join('');
 const MIL=[["2026-09-21", "21 ก.ย. 69", "เตรียมพื้นที่ ตอกเสาเข็ม"], ["2026-11-12", "12 พ.ย. 69", "ฐานรากเสร็จ"], ["2026-12-10", "10 ธ.ค. 69", "โครงสร้างชั้น 1"], ["2027-01-29", "29 ม.ค. 70", "โครงสร้างถึงชั้น 3"], ["2027-04-09", "9 เม.ย. 70", "โครงสร้างชั้น 6"], ["2027-05-21", "21 พ.ค. 70", "หลังคาเสร็จ"], ["2027-06-18", "18 มิ.ย. 70", "สถาปัตย์ถึงชั้น 4"], ["2027-08-04", "4 ส.ค. 70", "แล้วเสร็จ"]];
