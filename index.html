@@ -217,7 +217,7 @@ h2{font-weight:200;letter-spacing:.01em}.kicker,.chap-no .t{letter-spacing:.22em
         <span><b>6<small>ชั้น</small></b>+0.65 → +17.45</span>
         <span><b>16.5×32<small>ม.</small></b>7 rooms / floor</span>
         <span><b>22.47<small>ลบ.</small></b>Budget · BAC</span>
-        <span><b>338<small>วัน</small></b>Sep 26 – Aug 27</span>
+        <span><b>283<small>วัน</small></b>1 ก.ย. 69 – 4 ส.ค. 70</span>
       </div>
       <div class="cue"><i></i>Scroll · เลื่อนเพื่อหมุนรอบอาคาร</div>
     </div></div>
@@ -228,7 +228,7 @@ h2{font-weight:200;letter-spacing:.01em}.kicker,.chap-no .t{letter-spacing:.22em
     <div class="pin"><div class="col">
       <div class="chap-no"><span class="n">02</span><span class="r"></span><span class="t">Construction Sequence</span></div>
       <div class="kicker">ลำดับการก่อสร้างตามแผน · MS Project Baseline</div>
-      <div class="hud-date" id="hDate">21 ก.ย. 2569</div>
+      <div class="hud-date" id="hDate">1 ก.ย. 2569</div>
       <div class="hud-phase" id="hPhase">เตรียมพื้นที่ · ตอกเสาเข็ม</div>
       <div class="meter"><i id="hBar"></i></div>
       <div class="meter-l"><span>Planned progress · ถ่วงด้วยงบ</span><span id="hPct">0%</span></div>
@@ -381,7 +381,7 @@ g+=`<text x="${sx+10}" y="${Y(SS[9])-6}" fill="${css('--pv')}" font-size="12" fo
 document.getElementById('scurve').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="S-Curve: แผน 84.2% ต้นทุนจริง 80.3% ผลงาน 75.0% ณ 22 พ.ค. 70">${g}</svg>`;
 const CH=[{"fl": 4, "n": "ก่อผนัง AAC", "d": "20 พ.ค. – 1 มิ.ย.", "p": 0}, {"fl": 4, "n": "ฉาบปูน", "d": "27 พ.ค. – 8 มิ.ย.", "p": 0}, {"fl": 5, "n": "ก่อผนัง AAC", "d": "12 มิ.ย. – 24 มิ.ย.", "p": 0}, {"fl": 5, "n": "ฉาบปูน", "d": "19 มิ.ย. – 1 ก.ค.", "p": 0}, {"fl": 6, "n": "ก่อผนัง AAC", "d": "6 ก.ค. – 17 ก.ค.", "p": 0}, {"fl": 6, "n": "ฉาบปูน", "d": "13 ก.ค. – 24 ก.ค.", "p": 0}, {"fl": 6, "n": "ปูกระเบื้องพื้น", "d": "17 ก.ค. – 26 ก.ค.", "p": 0}, {"fl": 6, "n": "โครงฝ้า", "d": "21 ก.ค. – 29 ก.ค.", "p": 0}, {"fl": 6, "n": "ยิปซัมบอร์ด", "d": "27 ก.ค. – 4 ส.ค.", "p": 0}, {"fl": 6, "n": "บานประตู/หน้าต่าง", "d": "11 ส.ค. – 14 ส.ค.", "p": 0}, {"fl": 6, "n": "อุปกรณ์ประตู", "d": "16 ส.ค. – 16 ส.ค.", "p": 0}, {"fl": 6, "n": "ทาสีรองพื้น", "d": "2 ส.ค. – 6 ส.ค.", "p": 0}, {"fl": 6, "n": "ทาสีจริง", "d": "5 ส.ค. – 10 ส.ค.", "p": 0}];
 document.getElementById('chain').innerHTML=CH.map((c,i)=>`<div class="link"><small><span>Level ${c.fl}</span><i>${String(i+1).padStart(2,'0')}</i></small><b>${c.n}</b><span>${c.d}</span><div class="pg"><i style="width:${c.p}%"></i></div></div>`).join('');
-const MIL=[["2026-09-21", "21 ก.ย. 69", "เตรียมพื้นที่ ตอกเสาเข็ม"], ["2026-11-12", "12 พ.ย. 69", "ฐานรากเสร็จ"], ["2026-12-10", "10 ธ.ค. 69", "โครงสร้างชั้น 1"], ["2027-01-29", "29 ม.ค. 70", "โครงสร้างถึงชั้น 3"], ["2027-04-09", "9 เม.ย. 70", "โครงสร้างชั้น 6"], ["2027-05-21", "21 พ.ค. 70", "หลังคาเสร็จ"], ["2027-06-18", "18 มิ.ย. 70", "สถาปัตย์ถึงชั้น 4"], ["2027-08-04", "4 ส.ค. 70", "แล้วเสร็จ"]];
+const MIL=[["2026-09-01", "1 ก.ย. 69", "เริ่มงาน · เตรียมพื้นที่"], ["2026-09-21", "21 ก.ย. 69", "เตรียมพื้นที่เสร็จ · ตอกเสาเข็ม"], ["2026-11-12", "12 พ.ย. 69", "ฐานรากเสร็จ"], ["2026-12-10", "10 ธ.ค. 69", "โครงสร้างชั้น 1"], ["2027-01-29", "29 ม.ค. 70", "โครงสร้างถึงชั้น 3"], ["2027-04-09", "9 เม.ย. 70", "โครงสร้างชั้น 6"], ["2027-05-21", "21 พ.ค. 70", "หลังคาเสร็จ"], ["2027-06-18", "18 มิ.ย. 70", "สถาปัตย์ถึงชั้น 4"], ["2027-08-04", "4 ส.ค. 70", "แล้วเสร็จ"]];
 document.getElementById('miles').innerHTML=MIL.map(m=>`<li data-d="${m[0]}"><b>${m[1]}</b><span>${m[2]}</span></li>`).join('');
 const F3=[["ขัดมันพื้น", 100], ["ปูกระเบื้องพื้น", 100], ["ก่อผนัง AAC", 100], ["ฉาบปูน", 100], ["บุกระเบื้องผนัง", 100], ["โครงฝ้า", 0], ["ยิปซัมบอร์ด", 0], ["วงกบประตู/หน้าต่าง", 0], ["บานประตู/หน้าต่าง", 0], ["อุปกรณ์ประตู", 0], ["ทาสีรองพื้น", 0], ["ทาสีจริง", 0], ["กันซึมห้องน้ำ", 0], ["กันซึมระเบียง", 0], ["ทดสอบขังน้ำ", 0], ["สุขภัณฑ์", 0], ["อุปกรณ์ห้องน้ำ", 0], ["ผิวบันได", 0], ["ราวบันได", 0]];
 document.getElementById('f3').innerHTML=F3.map(([n,v])=>{const c=v>=100?'#9d9c96':v>0?'var(--wip)':'var(--todo)';return `<div class="task"><span>${n}</span><span class="b"><i style="width:${Math.max(v,2)}%;background:${c}"></i></span><em>${v}%</em></div>`;}).join('');
@@ -393,7 +393,7 @@ document.getElementById('f3').innerHTML=F3.map(([n,v])=>{const c=v>=100?'#9d9c96
 const NF = 72;
 const ORBIT = Array.from({length: NF}, (_, i) => `seq/o_${String(i + 1).padStart(3, '0')}.jpg`);
 const STAGES = [
-  ['2026-09-21', 'seq/con_seq1.jpg', 'เตรียมพื้นที่ · ตอกเสาเข็ม'],
+  ['2026-09-01', 'seq/con_seq1.jpg', 'เตรียมพื้นที่ · ตอกเสาเข็ม'],
   ['2026-10-20', 'seq/con_seq2.jpg', 'ขุดดิน · ฐานราก'],
   ['2026-12-10', 'seq/con_seq3.jpg', 'โครงสร้างชั้น 1–2 · ทาวเวอร์เครน'],
   ['2027-01-29', 'seq/con_seq4.jpg', 'โครงสร้างถึงชั้น 4 · แบบหล่อพื้น PT'],
@@ -431,7 +431,7 @@ const $ = id => document.getElementById(id);
 function progress(el) { const r = el.getBoundingClientRect(); const len = Math.max(1, r.height - innerHeight); return Math.max(0, Math.min(1, -r.top / len)); }
 function active() { let best = secs[0]; for (const s of secs) { if (s.getBoundingClientRect().top <= innerHeight * 0.5) best = s; } return best; }
 const DAY = 86400000, Dt = s => Date.parse(s + 'T00:00:00Z');
-const T0 = Dt('2026-09-21'), T1 = Dt('2027-08-04');
+const T0 = Dt('2026-09-01'), T1 = Dt('2027-08-04');
 const THM = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 const thDate = t => { const d = new Date(t); return `${d.getUTCDate()} ${THM[d.getUTCMonth()]} ${d.getUTCFullYear() + 543}`; };
 // cumulative planned value (BCWS) by month-end from the S-curve workbook
